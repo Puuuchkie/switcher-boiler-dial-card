@@ -367,7 +367,6 @@ const ct={attribute:!0,type:String,converter:v,reflect:!1,hasChanged:y},ht=(t=ct
   ha-card {
     display: flex;
     flex-direction: column;
-    height: 100%;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -376,23 +375,21 @@ const ct={attribute:!0,type:String,converter:v,reflect:!1,hasChanged:y},ht=(t=ct
   /* ── Dial wrapper ──────────────────────────────────────────────────────── */
 
   .timer-wrapper {
-    flex: 1;
-    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px 4px 0 4px;
-    container-type: size;
+    padding: 8px 8px 4px 8px;
+    container-type: inline-size;
   }
 
   .timer-svg {
     /*
-     * Fit the smaller of container width/height, capped at 260 px.
-     * The full-circle viewBox stays inside the wrapper without
-     * overlapping the power button below.
+     * Scale to the card's width, capped at 280 px.
+     * aspect-ratio keeps it square regardless of parent height,
+     * so the dial is always visible in vertical stacks, grids, etc.
      */
-    width:  min(100cqw, 100cqh, 260px);
-    height: min(100cqw, 100cqh, 260px);
+    width:  min(100cqw, 280px);
+    aspect-ratio: 1 / 1;
     display: block;
     touch-action: none;
   }
