@@ -1,95 +1,100 @@
-[![hacs][hacs-badge]][hacs-url]
-[![release][release-badge]][release-url]
+![Switcher Logo](images/Switcher_logo_200.png)
 
-![alt text](https://github.com/dmatik/switcher-boiler-card/blob/main/images/Switcher_logo_200.png "Logo")
+# switcher-boiler-dial-card
 
-# switcher-boiler-card
+Custom Switcher Boiler cards for Home Assistant — includes the original tile-style card plus a new **draggable circular timer dial** designed for quick, one-handed timer control on mobile.
 
-<a href="https://www.buymeacoffee.com/bg7MaEJHc" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/white_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+Built to work with the official [Switcher Integration](https://www.home-assistant.io/integrations/switcher_kis/) for Home Assistant.
 
-![alt text](https://github.com/dmatik/switcher-boiler-card/blob/main/images/switcher_boiler_card.png "Switcher Boiler Card")
+---
 
-## What is switcher-boiler-card ?
+## Cards
 
-Custom Switcher Boiler Switch card for Home Assistant.
-Built to work with official [Switcher Integration](https://www.home-assistant.io/integrations/switcher_kis/) for Home Assistant.
-The card designed to look and feel similar to other Tile cards in HA.
+### Circular Timer Dial *(new)*
 
-Welcome to our [Smart Home Israel](https://discord.gg/ayZ3Kkg) Discord channel to discuss.
-#### For any question, feel free to leave comment in my [HA Community post](https://community.home-assistant.io/t/lovelace-switcher-boiler-card/826475).
+Set a timer by dragging the knob around the arc — just like the Switcher app. Drag past the full circle to set times beyond 60 minutes. The device turns on automatically when you release.
 
+![Dial card preview](images/dial-card-preview.svg)
 
-### Features
+**Features:**
+- Drag the knob clockwise to set a timer (one full rotation = 60 min)
+- Multi-rotation support — drag 1.5× to set 90 min, etc.
+- Configurable maximum timer limit
+- Device turns on with the set timer the moment you release the knob
+- Resets to 0 if the device is manually turned off
+- Displays remaining time and optional power consumption sensor
+- Fully responsive — scales to any card size, works great on mobile
+- 44 px touch targets for comfortable finger dragging
 
--   Fully supports HA UI Editor (no need to edit YAML code).
--   Displays remaining time in state field.
--   Optional additional 2 sensors to display in state field. Sensor 1 to be displayed when Switcher is On. Sensor 2 to be displayed when Switcher is On and Off.
--   Optional icon sensor, very useful to display water temperature (if you have it installed separatelly), instead if icon.
--   Optional temperature color thresholds when icon sensor is being used.
--   Optional, configurable color thresholds for Cold and Hot limits, when icon sensor is being used.
--   The time selection button loops through configurable timer values in minutes, when clicked.
--   Turn on with or without selected timer.
--   Support editing in YAML as well (please see table below).
+---
+
+### Tile Card *(original)*
+
+The classic tile-style card with preset timer buttons.
+
+![Tile card preview](images/tile-card-preview.svg)
+
+**Features:**
+- Preset timer values (configurable)
+- Optional temperature / sensor display with color thresholds
+- Optional icon sensor for water temperature
+- Fully configurable from the HA UI editor
+
+---
 
 ## Installation
 
-### HACS
+### HACS (Custom Repository)
 
-Switcher Boiler Card is available in [HACS][hacs] (Home Assistant Community Store).
-
-Use this link to directly go to the repository in HACS
-
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=dmatik&repository=switcher-boiler-card)
-
-_or_
-
-1. Install HACS if you don't have it already
-2. Open HACS in Home Assistant
-3. Search for "Switcher Boiler Card"
-4. Click the download button.
+1. Open HACS in Home Assistant
+2. Go to **Frontend** → click the three-dot menu → **Custom repositories**
+3. Add `https://github.com/Puuuchkie/switcher-boiler-dial-card` as a **Dashboard** (Lovelace) repository
+4. Search for "Switcher Boiler Dial Card" and install it
+5. Reload your browser
 
 ### Manual
 
-1. Download `switcher-boiler-card.js` file from the [latest release][release-url].
-2. Put `switcher-boiler-card.js` file into your `config/www/switcher-boiler-card` folder.
-3. Add reference to `switcher-boiler-card.js` in Dashboard. There's two way to do that:
-    - **Using UI:** _Settings_ → _Dashboards_ → _More Options icon_ → _Resources_ → _Add Resource_ → Set _Url_ as `/local/switcher-boiler-card/switcher-boiler-card.js` → Set _Resource type_ as `JavaScript Module`.
-      **Note:** If you do not see the Resources menu, you will need to enable _Advanced Mode_ in your _User Profile_
-    - **Using YAML:** Add following code to `lovelace` section.
-        ```yaml
-        resources:
-            - url: /local/switcher-boiler-card/switcher-boiler-card.js
-              type: module
-        ```
+1. Download `switcher-boiler-card.js` from the [`dist/`](dist/) folder
+2. Copy it to `config/www/switcher-boiler-card/switcher-boiler-card.js`
+3. Add it as a resource in your dashboard:
+   - **UI:** _Settings_ → _Dashboards_ → _⋮_ → _Resources_ → _Add Resource_
+     - URL: `/local/switcher-boiler-card/switcher-boiler-card.js`
+     - Type: `JavaScript Module`
+   - **YAML:**
+     ```yaml
+     resources:
+       - url: /local/switcher-boiler-card/switcher-boiler-card.js
+         type: module
+     ```
+
+---
 
 ## Usage
 
-### UI Editor
-The card can be fully configured from HA UI Editor.
+Both cards are fully configurable from the HA UI editor. You can also use YAML.
 
-![alt text](https://github.com/dmatik/switcher-boiler-card/blob/main/images/switcher_editor.png "Switcher Boiler Card Editor")
+### Circular Timer Dial
 
+```yaml
+type: custom:switcher-boiler-card-circular
+entity: switch.switcher_touch_d54f
+name: Boiler
+time_left: sensor.switcher_touch_d54f_remaining_time
+power_sensor: sensor.switcher_touch_d54f_power
+timer_limit: 90
+```
 
-### YAML configuration
+| Name | Description | Required | Default |
+|---|---|---|---|
+| `type` | `custom:switcher-boiler-card-circular` | yes | |
+| `entity` | Switcher switch entity | yes | |
+| `name` | Card name. Leave empty to use entity friendly name. | no | entity name |
+| `icon` | Card icon. | no | |
+| `time_left` | Remaining time sensor entity. Displayed when device is on. | no | |
+| `power_sensor` | Power consumption sensor entity. Displayed when device is on. | no | |
+| `timer_limit` | Maximum timer in minutes. Limits how far the knob can be dragged. | no | `150` |
 
-
-|        Name          |                        Description                                                    |             Required             |             Default             |
-| -------------------- | ------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------- |
-| `type`               | `custom:switcher-boiler-card`                                                         | yes                              |                                 |
-| `entity`             | Switcher switch entity                                                                | yes                              |                                 |
-| `name`               | Card name. Leave empty to take entity friendly name.                                  | no                               | "Boiler"                        |
-| `icon`               | Card icon. Leave empty to take icon from entity.                                      | no                               | "mdi:waves"                     |
-| `time_left`          | Time left sensor entity. Leave empty if you don't want it to be displayed.            | no                               |                                 | 
-| `sensor_1`           | Sensor 1 entity. Displayed only when Switcher is On.                                  | no                               |                                 |
-| `sensor_2`           | Sensor 2 entity. Displayed when Switcher is On and Off.                               | no                               |                                 |
-| `icon_sensor`        | Icon Sensor entity. Displayed when Switcher is On and Off. Must be numeric.           | no                               |                                 |
-| `color_thresholds`   | temperature color thresholds for icon sensor.                                         | no                               | false                           |
-| `cold_threshold`     | Cold threshold upper limit.                                                           | no                               | 20                              |
-| `hot_threshold`      | Hot threshold lower limit.                                                            | no                               | 50                              |
-| `temp_resolution`    | Temperature resolution for decimal digits (0, 1 or 2).                                | no                               | 1                               |
-| `timer_values`       | List of values for timer in minutes (from 1 to 150).                                  | no                               | 15, 30, 45, 60                  |
-
-Example:
+### Tile Card (original)
 
 ```yaml
 type: custom:switcher-boiler-card
@@ -110,95 +115,70 @@ timer_values:
   - "60"
 ```
 
-## Development server
+| Name | Description | Required | Default |
+|---|---|---|---|
+| `type` | `custom:switcher-boiler-card` | yes | |
+| `entity` | Switcher switch entity | yes | |
+| `name` | Card name. Leave empty to use entity friendly name. | no | `"Boiler"` |
+| `icon` | Card icon. Leave empty to use entity icon. | no | `"mdi:waves"` |
+| `time_left` | Time left sensor entity. | no | |
+| `sensor_1` | Sensor displayed when Switcher is On. | no | |
+| `sensor_2` | Sensor displayed when Switcher is On or Off. | no | |
+| `icon_sensor` | Numeric sensor displayed as icon (e.g. water temperature). | no | |
+| `color_thresholds` | Enable temperature color thresholds for icon sensor. | no | `false` |
+| `cold_threshold` | Cold threshold upper limit. | no | `20` |
+| `hot_threshold` | Hot threshold lower limit. | no | `50` |
+| `temp_resolution` | Decimal digits for temperature (0, 1, or 2). | no | `1` |
+| `timer_values` | List of timer preset values in minutes. | no | `15, 30, 45, 60` |
 
-### Home assistant container
+---
 
-You can run a Home Assistant with docker by running:
+## Remaining Time Sensor (optional template)
 
-```sh
-npm run start:hass
-```
-
-Once it's done, go to Home Assistant instance [http://localhost:8123](http://localhost:8123) and start configuration.
-
-#### Windows Users
-
-```sh
-npm run start:hass-cmd
-```
-
-### Development
-
-In another terminal, install dependencies and run development server:
-
-```sh
-npm install
-npm run watch
-```
-
-Server will start on port `4000`.
-
-### Build
-
-You can build the `switcher-boiler-card.js` file in `dist` folder without server by running the build command.
-
-```sh
-npm run build
-```
-
-## Optional
-
-### Remaning Time Sensor
-
-You can use the below Template Sensor in HA to display the Remeaning Time sesnor in more user frinedly way.  
-Just replace `switch.switcher_touch_d54f` and `sensor.switcher_touch_d54f_remaining_time` with your entities names.
+Use this HA template sensor to display remaining time in a friendlier format.
+Replace entity names with your own.
 
 ```yaml
 template:
-
-    sensor:
-      # Remaining Time Alt
-      - name: "switcher_kis_remaining_time_alt"
-        unique_id: switcher_kis_remaining_time_alt
-        icon: mdi:timelapse
-        state: >-
-          {% if is_state("switch.switcher_touch_d54f", "off") or is_state("sensor.switcher_touch_d54f_remaining_time", "00:00:00") %}
-              off
-          {% else %}
-              {% set hour = states("sensor.switcher_touch_d54f_remaining_time").split(':')[0] %}
-              {% set min = states("sensor.switcher_touch_d54f_remaining_time").split(':')[1] %}
-              {% set sec = states("sensor.switcher_touch_d54f_remaining_time").split(':')[2] %}
-              {% set sec_int = sec|int %}
-              {% set min_int = min|int %}
-              {% set hour_int = hour|int %}
-
-              {% if min_int > 0 %}
-                {% set min_int = min_int + 1 %}
-              {% endif %}
-              {% if min_int == 60 %}
-                {% set min_int = 0 %}
-                {% set hour_int = hour_int + 1 %}
-              {% endif %}
-
-              {% if hour_int == 0 and min_int == 0 %}
-                  {{ sec_int }} sec
-              {% elif hour_int == 0 %}
-                  {{ min_int }} min
-              {% else %}
-                  {{'%02d' % hour_int}}:{{'%02d' % min_int}}
-              {% endif %}
-          {% endif %}
+  sensor:
+    - name: "switcher_kis_remaining_time_alt"
+      unique_id: switcher_kis_remaining_time_alt
+      icon: mdi:timelapse
+      state: >-
+        {% if is_state("switch.switcher_touch_d54f", "off") or is_state("sensor.switcher_touch_d54f_remaining_time", "00:00:00") %}
+            off
+        {% else %}
+            {% set hour = states("sensor.switcher_touch_d54f_remaining_time").split(':')[0] %}
+            {% set min  = states("sensor.switcher_touch_d54f_remaining_time").split(':')[1] %}
+            {% set sec  = states("sensor.switcher_touch_d54f_remaining_time").split(':')[2] %}
+            {% set sec_int  = sec|int %}
+            {% set min_int  = min|int %}
+            {% set hour_int = hour|int %}
+            {% if min_int > 0 %}{% set min_int = min_int + 1 %}{% endif %}
+            {% if min_int == 60 %}{% set min_int = 0 %}{% set hour_int = hour_int + 1 %}{% endif %}
+            {% if hour_int == 0 and min_int == 0 %}
+                {{ sec_int }} sec
+            {% elif hour_int == 0 %}
+                {{ min_int }} min
+            {% else %}
+                {{'%02d' % hour_int}}:{{'%02d' % min_int}}
+            {% endif %}
+        {% endif %}
 ```
 
+---
 
-<!-- Badges -->
-[hacs-badge]: https://img.shields.io/badge/hacs-default-orange.svg?style=flat-square
-[release-badge]: https://img.shields.io/github/v/release/dmatik/switcher-boiler-card?style=flat-square
+## Development
 
+```sh
+npm install
+npm run build      # produces dist/switcher-boiler-card.js
+npm run watch      # watch mode on port 4000
+npm run start:hass # run Home Assistant in Docker at http://localhost:8123
+```
 
-<!-- References -->
-[hacs-url]: https://github.com/hacs/integration
-[hacs]: https://hacs.xyz
-[home-assistant]: https://www.home-assistant.io/
-[release-url]: https://github.com/dmatik/switcher-boiler-card/releases
+---
+
+## Credits
+
+The tile-style card was originally created by [Dmitry Trosman (dmatik)](https://github.com/dmatik/switcher-boiler-card). This fork extends it with the circular timer dial variant.

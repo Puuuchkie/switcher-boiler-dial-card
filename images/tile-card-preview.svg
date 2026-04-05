@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 220" width="500" height="220">
+  <defs>
+    <filter id="cs" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="8" flood-color="#000" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <!-- Dashboard background -->
+  <rect width="500" height="220" fill="#f0f2f5"/>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LEFT CARD — device OFF
+       ═══════════════════════════════════════════════════════════ -->
+  <rect x="18" y="18" width="220" height="184" rx="14" fill="white" filter="url(#cs)"/>
+
+  <!-- Header row -->
+  <text x="46" y="56" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="500" fill="#212121">Boiler</text>
+  <!-- Power icon circle (off) -->
+  <circle cx="214" cy="50" r="16" fill="rgba(158,158,158,0.2)"/>
+  <text x="214" y="55" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="15" fill="#424242">⏻</text>
+
+  <!-- State row -->
+  <text x="46" y="82" font-family="system-ui,-apple-system,sans-serif" font-size="13" fill="#9e9e9e">Off</text>
+
+  <!-- Divider -->
+  <line x1="28" y1="96" x2="228" y2="96" stroke="rgba(0,0,0,0.07)" stroke-width="1"/>
+
+  <!-- Timer label -->
+  <text x="46" y="120" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#9e9e9e">Set timer</text>
+
+  <!-- Timer buttons row -->
+  <rect x="30" y="130" width="46" height="28" rx="6" fill="rgba(158,158,158,0.15)"/>
+  <text x="53" y="149" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#424242">15m</text>
+
+  <rect x="82" y="130" width="46" height="28" rx="6" fill="rgba(158,158,158,0.15)"/>
+  <text x="105" y="149" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#424242">30m</text>
+
+  <rect x="134" y="130" width="46" height="28" rx="6" fill="rgba(158,158,158,0.15)"/>
+  <text x="157" y="149" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#424242">45m</text>
+
+  <rect x="186" y="130" width="40" height="28" rx="6" fill="rgba(158,158,158,0.15)"/>
+  <text x="206" y="149" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#424242">1h</text>
+
+  <!-- Start button -->
+  <rect x="30" y="166" width="196" height="28" rx="8" fill="rgba(158,158,158,0.2)"/>
+  <text x="128" y="185" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="500" fill="#424242">Turn On</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       RIGHT CARD — device ON, 30 min running
+       ═══════════════════════════════════════════════════════════ -->
+  <rect x="262" y="18" width="220" height="184" rx="14" fill="white" filter="url(#cs)"/>
+
+  <!-- Header row -->
+  <text x="290" y="56" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="500" fill="#212121">Boiler</text>
+  <!-- Power icon circle (on = red) -->
+  <circle cx="458" cy="50" r="16" fill="#F54436"/>
+  <text x="458" y="55" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="15" fill="white">⏻</text>
+
+  <!-- State row: time left + power -->
+  <text x="290" y="80" font-family="system-ui,-apple-system,sans-serif" font-size="13" fill="#F54436">On · 00:28:45</text>
+  <text x="290" y="96" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#9e9e9e">2.4 kW</text>
+
+  <!-- Divider -->
+  <line x1="272" y1="108" x2="472" y2="108" stroke="rgba(0,0,0,0.07)" stroke-width="1"/>
+
+  <!-- Timer label -->
+  <text x="290" y="132" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#9e9e9e">Set timer</text>
+
+  <!-- Timer buttons row — 30m highlighted -->
+  <rect x="274" y="142" width="46" height="28" rx="6" fill="rgba(158,158,158,0.15)"/>
+  <text x="297" y="161" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#424242">15m</text>
+
+  <rect x="326" y="142" width="46" height="28" rx="6" fill="#F54436"/>
+  <text x="349" y="161" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="600" fill="white">30m</text>
+
+  <rect x="378" y="142" width="46" height="28" rx="6" fill="rgba(158,158,158,0.15)"/>
+  <text x="401" y="161" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#424242">45m</text>
+
+  <rect x="430" y="142" width="40" height="28" rx="6" fill="rgba(158,158,158,0.15)"/>
+  <text x="450" y="161" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#424242">1h</text>
+
+  <!-- Stop button -->
+  <rect x="274" y="178" width="196" height="28" rx="8" fill="#F54436"/>
+  <text x="372" y="197" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="500" fill="white">Turn Off</text>
+</svg>

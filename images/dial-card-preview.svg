@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 310" width="500" height="310">
+  <defs>
+    <filter id="cs" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="8" flood-color="#000" flood-opacity="0.10"/>
+    </filter>
+    <filter id="ks" x="-150%" y="-150%" width="400%" height="400%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2.5" flood-color="#000" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <!-- Dashboard background -->
+  <rect width="500" height="310" fill="#f0f2f5"/>
+
+  <!--
+    Arc geometry (matches card-circular.ts):
+      CX=120/380  CY=152
+      R=78
+      FULL_CIRC = 2π×78 ≈ 490.09
+      TRACK_LEN = 490.09×0.75 ≈ 367.57   (270° arc)
+      GAP_LEN   = 490.09×0.25 ≈ 122.52   (90° gap at bottom)
+      ARC_ROTATE = 135  (stroke starts at ARC_START=225° clock)
+
+    Handle positions:
+      0 min  → clockAngle=225°  → math 135°  → (65,  207)  bottom-left
+      30 min → clockAngle=360°  → math 270°  → (120,  74)  top
+      45 min → clockAngle=427°=67.5° → math -22.5° → (192, 122)  right
+      60 min → clockAngle=495°=135° → math 45°  → (175, 207)  bottom-right
+  -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LEFT CARD — dial set to 45 min, device OFF (pre-set)
+       ═══════════════════════════════════════════════════════════ -->
+  <rect x="18" y="18" width="204" height="262" rx="14"
+        fill="white" filter="url(#cs)"/>
+
+  <!-- Gray background track (270°) -->
+  <circle cx="120" cy="152" r="78" fill="none"
+    stroke="rgba(128,128,128,0.17)" stroke-width="13" stroke-linecap="round"
+    stroke-dasharray="367.57 122.52"
+    transform="rotate(135,120,152)"/>
+
+  <!-- Active arc: 45 min = 75% of lap → activeDash=275.68 -->
+  <circle cx="120" cy="152" r="78" fill="none"
+    stroke="#F54436" stroke-width="13" stroke-linecap="round"
+    stroke-dasharray="275.68 214.41"
+    transform="rotate(135,120,152)"/>
+
+  <!-- Tick dots at 0 / 15 / 30 min (skip 45 — handle is there) -->
+  <circle cx="65"  cy="207" r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="48"  cy="122" r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="120" cy="74"  r="2.5" fill="rgba(128,128,128,0.40)"/>
+
+  <!-- Inner text -->
+  <text x="120" y="116" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="13" fill="#9e9e9e">Boiler</text>
+  <text x="120" y="148" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="40" font-weight="600" fill="#212121">45</text>
+  <text x="120" y="171" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#9e9e9e">min</text>
+  <text x="120" y="186" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#616161">off</text>
+
+  <!-- Handle at 45 min → (192, 122) -->
+  <circle cx="192" cy="122" r="11" fill="white" stroke="#F54436" stroke-width="2.5"
+    filter="url(#ks)"/>
+
+  <!-- Power button (off) -->
+  <rect x="30" y="248" width="180" height="24" rx="8" fill="rgba(158,158,158,0.2)"/>
+  <text x="120" y="260" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="500" fill="#424242">Turn On</text>
+
+  <!-- Caption -->
+  <text x="120" y="294" text-anchor="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#9e9e9e">Drag knob to set timer</text>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       RIGHT CARD — 30 min running, device ON
+       ═══════════════════════════════════════════════════════════ -->
+  <rect x="278" y="18" width="204" height="262" rx="14"
+        fill="white" filter="url(#cs)"/>
+
+  <!-- Gray background track (270°) -->
+  <circle cx="380" cy="152" r="78" fill="none"
+    stroke="rgba(128,128,128,0.17)" stroke-width="13" stroke-linecap="round"
+    stroke-dasharray="367.57 122.52"
+    transform="rotate(135,380,152)"/>
+
+  <!-- Active arc: 30 min = 50% of lap → activeDash=183.79 -->
+  <circle cx="380" cy="152" r="78" fill="none"
+    stroke="#F54436" stroke-width="13" stroke-linecap="round"
+    stroke-dasharray="183.79 306.30"
+    transform="rotate(135,380,152)"/>
+
+  <!-- Tick dots at 0 / 15 / 45 min (skip 30 — handle is there) -->
+  <circle cx="325" cy="207" r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="308" cy="122" r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="452" cy="122" r="2.5" fill="rgba(128,128,128,0.40)"/>
+
+  <!-- Inner text -->
+  <text x="380" y="116" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="13" fill="#9e9e9e">Boiler</text>
+  <text x="380" y="148" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="40" font-weight="600" fill="#212121">30</text>
+  <text x="380" y="171" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#9e9e9e">min</text>
+  <text x="380" y="186" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#616161">00:28:45</text>
+  <text x="380" y="199" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#9e9e9e">2.4 kW</text>
+
+  <!-- Handle at 30 min → top (380, 74) -->
+  <circle cx="380" cy="74" r="11" fill="white" stroke="#F54436" stroke-width="2.5"
+    filter="url(#ks)"/>
+
+  <!-- Power button (on = red) -->
+  <rect x="290" y="248" width="180" height="24" rx="8" fill="#F54436"/>
+  <text x="380" y="260" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="500" fill="white">Turn Off</text>
+
+  <!-- Caption -->
+  <text x="380" y="294" text-anchor="middle"
+    font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#9e9e9e">Timer running — tap name for details</text>
+</svg>
