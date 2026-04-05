@@ -6,17 +6,17 @@ import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
 // ── SVG geometry ─────────────────────────────────────────────────────────────
 const CX = 120;
 const CY = 120;
-const R = 90;
+const R = 95;
 
-// 270° arc: starts at bottom-left (225°), ends at bottom-right (315°),
-// going clockwise through the top.  Gap (90°) is at the bottom.
-const ARC_START_DEG = 225;   // clock angle where 0 min sits
-const ARC_SPAN_DEG  = 270;   // total arc degrees
-const ARC_ROTATE    = ARC_START_DEG - 90;  // SVG rotation offset = 135°
+// Full 360° circle: starts at 12 o'clock (top), goes clockwise.
+// No gap — every position on the ring is usable.
+const ARC_START_DEG = 0;     // clock angle where 0 min sits (top / 12 o'clock)
+const ARC_SPAN_DEG  = 360;   // full circle
+const ARC_ROTATE    = -90;   // rotate SVG stroke so it starts at top, not right
 
-const FULL_CIRC    = 2 * Math.PI * R;            // ≈ 565.49
-const TRACK_LEN    = FULL_CIRC * (ARC_SPAN_DEG / 360); // 270° portion ≈ 424.12
-const GAP_LEN      = FULL_CIRC - TRACK_LEN;            // 90° gap      ≈ 141.37
+const FULL_CIRC = 2 * Math.PI * R;  // ≈ 596.90
+const TRACK_LEN = FULL_CIRC;        // full circle — no gap
+const GAP_LEN   = 0;
 
 const MIN_PER_ROTATION = 60;    // full arc = 60 min  →  top-to-bottom = 30 min
 const DEFAULT_LIMIT_MIN = 150;
@@ -68,12 +68,12 @@ export class SwitcherBoilerCardCircular extends LitElement {
   static styles = circularStyles;
 
   static getConfigElement() {
-    return document.createElement("switcher-boiler-card-circular-editor");
+    return document.createElement("switcher-boiler-dial-card-editor");
   }
 
   static getStubConfig() {
     return {
-      type: "custom:switcher-boiler-card-circular",
+      type: "custom:switcher-boiler-dial-card",
       name: "Boiler",
       entity: "",
       icon: "",
@@ -256,34 +256,24 @@ export class SwitcherBoilerCardCircular extends LitElement {
                 <feDropShadow dx="0" dy="1" stdDeviation="2.5"
                   flood-color="#000" flood-opacity="0.2" />
               </filter>
-              <!-- Clip inner text to the circle interior -->
-              <clipPath id="inner-clip">
-                <circle cx="${CX}" cy="${CY}" r="${R - 14}" />
-              </clipPath>
             </defs>
 
-            <!-- ── Track (270° gray arc) ─────────────────────────────── -->
+            <!-- ── Track (full gray circle) ──────────────────────────── -->
             <circle cx="${CX}" cy="${CY}" r="${R}"
               fill="none"
               stroke="rgba(128,128,128,0.18)"
               stroke-width="13"
-              stroke-linecap="round"
-              stroke-dasharray="${TRACK_LEN} ${GAP_LEN}"
-              transform="rotate(${ARC_ROTATE}, ${CX}, ${CY})"
             />
 
-            <!-- Completed-lap ring (muted full track) -->
+            <!-- Completed-lap ring (muted full circle) -->
             ${fullLaps > 0 ? svg`
               <circle cx="${CX}" cy="${CY}" r="${R}"
                 fill="none"
                 stroke="rgba(245,68,54,0.2)"
                 stroke-width="13"
-                stroke-linecap="round"
-                stroke-dasharray="${TRACK_LEN} ${GAP_LEN}"
-                transform="rotate(${ARC_ROTATE}, ${CX}, ${CY})"
               />` : ""}
 
-            <!-- Active arc (red fill of the track) -->
+            <!-- Active arc (red, starts at 12 o'clock, goes clockwise) -->
             ${showArc ? svg`
               <circle cx="${CX}" cy="${CY}" r="${R}"
                 fill="none"
@@ -294,7 +284,7 @@ export class SwitcherBoilerCardCircular extends LitElement {
                 transform="rotate(${ARC_ROTATE}, ${CX}, ${CY})"
               />` : ""}
 
-            <!-- Tick dots at 0 / 15 / 30 / 45 min -->
+            <!-- Tick dots at 0 / 15 / 30 / 45 min (cardinal positions) -->
             ${TICK_MIN.map((min) => {
               const ca = minutesToClockAngle(min, MIN_PER_ROTATION);
               const p  = clockAngleToXY(ca);
@@ -304,39 +294,37 @@ export class SwitcherBoilerCardCircular extends LitElement {
             })}
 
             <!-- ── Inner content (name · timer · state) ──────────────── -->
-            <g clip-path="url(#inner-clip)">
-              <!-- Name (tap for more-info) -->
-              <text x="${CX}" y="82"
-                text-anchor="middle" dominant-baseline="middle"
-                class="inner-name"
-                @click="${this._showMoreInfo}"
-              >${displayName}</text>
+            <!-- Name (tap for more-info) -->
+            <text x="${CX}" y="82"
+              text-anchor="middle" dominant-baseline="middle"
+              class="inner-name"
+              @click="${this._showMoreInfo}"
+            >${displayName}</text>
 
-              <!-- Timer value -->
-              <text x="${CX}" y="116"
-                text-anchor="middle" dominant-baseline="middle"
-                class="center-value"
-              >${this._timerDisplay}</text>
+            <!-- Timer value -->
+            <text x="${CX}" y="118"
+              text-anchor="middle" dominant-baseline="middle"
+              class="center-value"
+            >${this._timerDisplay}</text>
 
-              <!-- Unit -->
-              <text x="${CX}" y="140"
-                text-anchor="middle" dominant-baseline="middle"
-                class="center-unit"
-              >${this._timerUnit}</text>
+            <!-- Unit -->
+            <text x="${CX}" y="144"
+              text-anchor="middle" dominant-baseline="middle"
+              class="center-unit"
+            >${this._timerUnit}</text>
 
-              <!-- State -->
-              <text x="${CX}" y="157"
-                text-anchor="middle" dominant-baseline="middle"
-                class="inner-state"
-              >${stateText}</text>
+            <!-- State -->
+            <text x="${CX}" y="161"
+              text-anchor="middle" dominant-baseline="middle"
+              class="inner-state"
+            >${stateText}</text>
 
-              <!-- Power sensor (optional) -->
-              ${powerText ? svg`
-                <text x="${CX}" y="171"
-                  text-anchor="middle" dominant-baseline="middle"
-                  class="inner-power"
-                >${powerText}</text>` : ""}
-            </g>
+            <!-- Power sensor (optional) -->
+            ${powerText ? svg`
+              <text x="${CX}" y="177"
+                text-anchor="middle" dominant-baseline="middle"
+                class="inner-power"
+              >${powerText}</text>` : ""}
 
             <!-- ── Handle ─────────────────────────────────────────────── -->
             <!-- Visual dot (no pointer events) -->

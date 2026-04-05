@@ -17,12 +17,12 @@ export class SwitcherBoilerCard extends LitElement {
   }
 
   static getConfigElement() {
-    return document.createElement("switcher-boiler-card-editor");
+    return document.createElement("switcher-boiler-tile-card-editor");
   }
 
   static getStubConfig() {
     return {
-      type: "custom:switcher-boiler-card",
+      type: "custom:switcher-boiler-tile-card",
       name: "Boiler",
       entity: "",
       icon: "",

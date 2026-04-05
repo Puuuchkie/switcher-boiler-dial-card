@@ -13,7 +13,7 @@
 .hass_dev/www/community/*
 
 dist/*
-!dist/switcher-boiler-card.js
+!dist/switcher-boiler-dial-card.js
 .vscode
 .idea
 *.map

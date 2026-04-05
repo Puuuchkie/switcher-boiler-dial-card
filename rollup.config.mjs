@@ -23,7 +23,7 @@ export default [
   {
     input: "src/main.ts",
     output: {
-      file: 'dist/switcher-boiler-card.js',
+      file: 'dist/switcher-boiler-dial-card.js',
       format: "es",
       inlineDynamicImports: true,
       sourcemap: !isProduction,

@@ -18,18 +18,18 @@ export default css`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 6px 2px 6px;
+    padding: 4px 4px 0 4px;
     container-type: size;
   }
 
   .timer-svg {
     /*
-     * Fit the smaller of container width/height, capped at 230 px.
-     * The 270° arc + square viewBox means this always stays inside the wrapper
-     * with no overflow onto the header or button.
+     * Fit the smaller of container width/height, capped at 260 px.
+     * The full-circle viewBox stays inside the wrapper without
+     * overlapping the power button below.
      */
-    width:  min(100cqw, 100cqh, 230px);
-    height: min(100cqw, 100cqh, 230px);
+    width:  min(100cqw, 100cqh, 260px);
+    height: min(100cqw, 100cqh, 260px);
     display: block;
     touch-action: none;
   }

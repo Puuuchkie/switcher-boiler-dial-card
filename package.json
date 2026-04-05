@@ -1,15 +1,14 @@
 {
-  "name": "switcher-boiler-card",
-  "version": "1.4.2",
-  "description": "Custom Switcher Boiler Switch card for Home Assistant.",
+  "name": "switcher-boiler-dial-card",
+  "version": "1.0.0",
+  "description": "Switcher Boiler card with a draggable circular timer dial for Home Assistant.",
   "author": {
-    "name": "Dmitry Trosman",
-    "email": "dmatik@gmail.com",
-    "url": "https://github.com/dmatik"
+    "name": "Puuuchkie",
+    "url": "https://github.com/Puuuchkie"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dmatik/switcher-boiler-card"
+    "url": "https://github.com/Puuuchkie/switcher-boiler-dial-card"
   },  
   "targets": {
     "module": {

@@ -12,19 +12,17 @@
   <rect width="500" height="310" fill="#f0f2f5"/>
 
   <!--
-    Arc geometry (matches card-circular.ts):
-      CX=120/380  CY=152
-      R=78
-      FULL_CIRC = 2π×78 ≈ 490.09
-      TRACK_LEN = 490.09×0.75 ≈ 367.57   (270° arc)
-      GAP_LEN   = 490.09×0.25 ≈ 122.52   (90° gap at bottom)
-      ARC_ROTATE = 135  (stroke starts at ARC_START=225° clock)
+    Arc geometry (matches card-circular.ts after 360° rewrite):
+      CX=120/380  CY=148
+      R=82
+      FULL_CIRC = 2π×82 ≈ 515.22
+      ARC_ROTATE = -90  (stroke starts at top / 12 o'clock)
 
-    Handle positions:
-      0 min  → clockAngle=225°  → math 135°  → (65,  207)  bottom-left
-      30 min → clockAngle=360°  → math 270°  → (120,  74)  top
-      45 min → clockAngle=427°=67.5° → math -22.5° → (192, 122)  right
-      60 min → clockAngle=495°=135° → math 45°  → (175, 207)  bottom-right
+    Handle positions (clock angle = minutes/60 × 360):
+      0 min  → 0°   → top    → (120/380, 66)
+      15 min → 90°  → right  → (202/462, 148)
+      30 min → 180° → bottom → (120/380, 230)
+      45 min → 270° → left   → (38/298,  148)
   -->
 
   <!-- ═══════════════════════════════════════════════════════════
@@ -33,35 +31,33 @@
   <rect x="18" y="18" width="204" height="262" rx="14"
         fill="white" filter="url(#cs)"/>
 
-  <!-- Gray background track (270°) -->
-  <circle cx="120" cy="152" r="78" fill="none"
-    stroke="rgba(128,128,128,0.17)" stroke-width="13" stroke-linecap="round"
-    stroke-dasharray="367.57 122.52"
-    transform="rotate(135,120,152)"/>
+  <!-- Gray background track (full circle) -->
+  <circle cx="120" cy="148" r="82" fill="none"
+    stroke="rgba(128,128,128,0.17)" stroke-width="13"/>
 
-  <!-- Active arc: 45 min = 75% of lap → activeDash=275.68 -->
-  <circle cx="120" cy="152" r="78" fill="none"
+  <!-- Active arc: 45 min = 75% → activeDash = 515.22×0.75 = 386.41 -->
+  <circle cx="120" cy="148" r="82" fill="none"
     stroke="#F54436" stroke-width="13" stroke-linecap="round"
-    stroke-dasharray="275.68 214.41"
-    transform="rotate(135,120,152)"/>
+    stroke-dasharray="386.41 128.81"
+    transform="rotate(-90,120,148)"/>
 
   <!-- Tick dots at 0 / 15 / 30 min (skip 45 — handle is there) -->
-  <circle cx="65"  cy="207" r="2.5" fill="rgba(128,128,128,0.40)"/>
-  <circle cx="48"  cy="122" r="2.5" fill="rgba(128,128,128,0.40)"/>
-  <circle cx="120" cy="74"  r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="120" cy="66"  r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="202" cy="148" r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="120" cy="230" r="2.5" fill="rgba(128,128,128,0.40)"/>
 
   <!-- Inner text -->
-  <text x="120" y="116" text-anchor="middle" dominant-baseline="middle"
+  <text x="120" y="112" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="13" fill="#9e9e9e">Boiler</text>
-  <text x="120" y="148" text-anchor="middle" dominant-baseline="middle"
+  <text x="120" y="144" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="40" font-weight="600" fill="#212121">45</text>
-  <text x="120" y="171" text-anchor="middle" dominant-baseline="middle"
+  <text x="120" y="168" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#9e9e9e">min</text>
-  <text x="120" y="186" text-anchor="middle" dominant-baseline="middle"
+  <text x="120" y="184" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#616161">off</text>
 
-  <!-- Handle at 45 min → (192, 122) -->
-  <circle cx="192" cy="122" r="11" fill="white" stroke="#F54436" stroke-width="2.5"
+  <!-- Handle at 45 min → left (38, 148) -->
+  <circle cx="38" cy="148" r="11" fill="white" stroke="#F54436" stroke-width="2.5"
     filter="url(#ks)"/>
 
   <!-- Power button (off) -->
@@ -80,37 +76,35 @@
   <rect x="278" y="18" width="204" height="262" rx="14"
         fill="white" filter="url(#cs)"/>
 
-  <!-- Gray background track (270°) -->
-  <circle cx="380" cy="152" r="78" fill="none"
-    stroke="rgba(128,128,128,0.17)" stroke-width="13" stroke-linecap="round"
-    stroke-dasharray="367.57 122.52"
-    transform="rotate(135,380,152)"/>
+  <!-- Gray background track (full circle) -->
+  <circle cx="380" cy="148" r="82" fill="none"
+    stroke="rgba(128,128,128,0.17)" stroke-width="13"/>
 
-  <!-- Active arc: 30 min = 50% of lap → activeDash=183.79 -->
-  <circle cx="380" cy="152" r="78" fill="none"
+  <!-- Active arc: 30 min = 50% → activeDash = 515.22×0.5 = 257.61 -->
+  <circle cx="380" cy="148" r="82" fill="none"
     stroke="#F54436" stroke-width="13" stroke-linecap="round"
-    stroke-dasharray="183.79 306.30"
-    transform="rotate(135,380,152)"/>
+    stroke-dasharray="257.61 257.61"
+    transform="rotate(-90,380,148)"/>
 
   <!-- Tick dots at 0 / 15 / 45 min (skip 30 — handle is there) -->
-  <circle cx="325" cy="207" r="2.5" fill="rgba(128,128,128,0.40)"/>
-  <circle cx="308" cy="122" r="2.5" fill="rgba(128,128,128,0.40)"/>
-  <circle cx="452" cy="122" r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="380" cy="66"  r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="462" cy="148" r="2.5" fill="rgba(128,128,128,0.40)"/>
+  <circle cx="298" cy="148" r="2.5" fill="rgba(128,128,128,0.40)"/>
 
   <!-- Inner text -->
-  <text x="380" y="116" text-anchor="middle" dominant-baseline="middle"
+  <text x="380" y="112" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="13" fill="#9e9e9e">Boiler</text>
-  <text x="380" y="148" text-anchor="middle" dominant-baseline="middle"
+  <text x="380" y="144" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="40" font-weight="600" fill="#212121">30</text>
-  <text x="380" y="171" text-anchor="middle" dominant-baseline="middle"
+  <text x="380" y="168" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#9e9e9e">min</text>
-  <text x="380" y="186" text-anchor="middle" dominant-baseline="middle"
+  <text x="380" y="184" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#616161">00:28:45</text>
-  <text x="380" y="199" text-anchor="middle" dominant-baseline="middle"
+  <text x="380" y="198" text-anchor="middle" dominant-baseline="middle"
     font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#9e9e9e">2.4 kW</text>
 
-  <!-- Handle at 30 min → top (380, 74) -->
-  <circle cx="380" cy="74" r="11" fill="white" stroke="#F54436" stroke-width="2.5"
+  <!-- Handle at 30 min → bottom (380, 230) -->
+  <circle cx="380" cy="230" r="11" fill="white" stroke="#F54436" stroke-width="2.5"
     filter="url(#ks)"/>
 
   <!-- Power button (on = red) -->

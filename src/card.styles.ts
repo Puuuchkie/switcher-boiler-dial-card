@@ -38,13 +38,10 @@ export default css`
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 11px;
-      padding-top: 0px;
+      padding: 8px 11px 11px 11px;
       gap: 12px;
       width: 100%;
-      //height: 100%;
       box-sizing: border-box;
-      //justify-content: space-evenly;
   }
 
   .buttons-group {
