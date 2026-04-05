@@ -1,6 +1,7 @@
 import { SwitcherBoilerCard } from "./card";
 import { SwitcherBoilerCardCircular } from "./card-circular";
 import { SwitcherBoilerCardEditor } from "./editor";
+import { SwitcherBoilerCardCircularEditor } from "./editor-circular";
 import { version } from "../package.json"
 
 declare global {
@@ -16,6 +17,7 @@ console.groupEnd();
 customElements.define("switcher-boiler-card", SwitcherBoilerCard);
 customElements.define("switcher-boiler-card-circular", SwitcherBoilerCardCircular);
 customElements.define("switcher-boiler-card-editor", SwitcherBoilerCardEditor);
+customElements.define("switcher-boiler-card-circular-editor", SwitcherBoilerCardCircularEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({

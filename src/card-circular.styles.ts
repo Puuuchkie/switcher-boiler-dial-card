@@ -12,19 +12,20 @@ export default css`
   .card-header {
     display: flex;
     align-items: center;
-    padding: 12px 12px 0 12px;
+    padding: 10px 10px 2px 10px;
     cursor: pointer;
+    flex-shrink: 0;
   }
 
   .icon-container {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-right: 10px;
+    margin-right: 9px;
     transition: background-color 180ms ease-in-out;
   }
 
@@ -53,6 +54,7 @@ export default css`
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0;
   }
 
   .primary {
@@ -78,12 +80,13 @@ export default css`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 16px;
+    padding: 2px 14px;
+    min-height: 0;
   }
 
   .timer-svg {
     width: 100%;
-    max-width: 220px;
+    max-width: 210px;
     touch-action: none;
     overflow: visible;
   }
@@ -91,7 +94,6 @@ export default css`
   .timer-handle {
     cursor: grab;
     touch-action: none;
-    transition: r 120ms ease;
   }
 
   .timer-handle.dragging {
@@ -107,7 +109,7 @@ export default css`
   }
 
   .center-value {
-    font-size: 44px;
+    font-size: 42px;
     fill: var(--primary-text-color);
     font-family: 'Roboto', sans-serif;
     font-weight: 600;
@@ -115,7 +117,7 @@ export default css`
   }
 
   .center-unit {
-    font-size: 14px;
+    font-size: 13px;
     fill: var(--secondary-text-color, #888);
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
@@ -124,12 +126,12 @@ export default css`
 
   .bottom-controls {
     display: flex;
-    gap: 10px;
-    padding: 4px 12px 12px 12px;
+    padding: 2px 10px 10px 10px;
+    flex-shrink: 0;
   }
 
   .btn {
-    height: 42px;
+    height: 40px;
     border: none;
     border-radius: var(--control-button-border-radius, 10px);
     cursor: pointer;
@@ -141,7 +143,6 @@ export default css`
     font-family: 'Roboto', sans-serif;
     font-weight: 500;
     font-size: 14px;
-    color: var(--primary-text-color);
     overflow: hidden;
     position: relative;
   }
@@ -152,45 +153,32 @@ export default css`
   }
 
   .power-btn {
-    width: 50px;
-    flex-shrink: 0;
+    flex: 1;
   }
 
   .power-btn.on {
     background-color: #F54436;
+    color: #ffffff;
   }
 
   .power-btn.on .btn-icon {
     color: #ffffff;
   }
 
+  .power-btn.on:hover {
+    background-color: #d43020;
+  }
+
   .power-btn.off {
     background-color: rgba(158, 158, 158, 0.2);
+    color: var(--primary-text-color);
   }
 
   .power-btn.off .btn-icon {
     color: var(--primary-text-color);
   }
 
-  .power-btn:hover.on {
-    background-color: #d43020;
-  }
-
-  .power-btn:hover.off {
+  .power-btn.off:hover {
     background-color: rgba(158, 158, 158, 0.3);
-  }
-
-  .timer-btn {
-    flex: 1;
-    background-color: rgba(245, 68, 54, 0.12);
-    color: #F54436;
-  }
-
-  .timer-btn:hover {
-    background-color: rgba(245, 68, 54, 0.22);
-  }
-
-  .timer-btn .btn-icon {
-    color: #F54436;
   }
 `;

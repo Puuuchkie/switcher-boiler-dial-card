@@ -12,7 +12,8 @@
 !.hass_dev/packages
 .hass_dev/www/community/*
 
-dist/
+dist/*
+!dist/switcher-boiler-card.js
 .vscode
 .idea
 *.map
