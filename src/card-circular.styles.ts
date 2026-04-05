@@ -5,76 +5,12 @@ export default css`
     display: flex;
     flex-direction: column;
     height: 100%;
+    overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
-    overflow: hidden;
   }
 
-  .card-header {
-    display: flex;
-    align-items: center;
-    padding: 10px 10px 2px 10px;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .icon-container {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-right: 9px;
-    transition: background-color 180ms ease-in-out;
-  }
-
-  .icon-container.on {
-    background-color: rgba(245, 68, 54, 0.2);
-  }
-
-  .icon-container.off {
-    background-color: rgba(158, 158, 158, 0.2);
-  }
-
-  .icon {
-    --mdc-icon-size: 20px;
-    line-height: 0;
-  }
-
-  .icon.on {
-    color: #F54436;
-  }
-
-  .icon.off {
-    color: var(--state-light-off-color, var(--state-inactive-color));
-  }
-
-  .header-label {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-width: 0;
-  }
-
-  .primary {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--primary-text-color);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .secondary {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--secondary-text-color, var(--primary-text-color));
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  /* ── Dial wrapper ──────────────────────────────────────────────────────── */
 
   .timer-wrapper {
     flex: 1;
@@ -82,38 +18,31 @@ export default css`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px;
-    /* Expose this element's content-box dimensions as cqw / cqh */
+    padding: 6px 6px 2px 6px;
     container-type: size;
   }
 
   .timer-svg {
     /*
-     * Scale to the smaller of container width or height, capped at 210 px.
-     * Because the viewBox is square (240×240) this keeps the dial perfectly
-     * circular and contained at any card size — no overflow onto header/button.
+     * Fit the smaller of container width/height, capped at 230 px.
+     * The 270° arc + square viewBox means this always stays inside the wrapper
+     * with no overflow onto the header or button.
      */
-    width: min(100cqw, 100cqh, 210px);
-    height: min(100cqw, 100cqh, 210px);
+    width:  min(100cqw, 100cqh, 230px);
+    height: min(100cqw, 100cqh, 230px);
     display: block;
     touch-action: none;
   }
 
-  .timer-handle {
-    cursor: grab;
-    touch-action: none;
-  }
+  /* ── SVG text inside the dial ──────────────────────────────────────────── */
 
-  .timer-handle.dragging {
-    cursor: grabbing;
-  }
-
-  .tick-label {
-    font-size: 13px;
+  .inner-name {
+    font-size: 14px;
     fill: var(--secondary-text-color, #888);
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
-    pointer-events: none;
+    pointer-events: all;
+    cursor: pointer;
   }
 
   .center-value {
@@ -132,14 +61,43 @@ export default css`
     pointer-events: none;
   }
 
+  .inner-state {
+    font-size: 12px;
+    fill: var(--primary-text-color);
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    pointer-events: none;
+  }
+
+  .inner-power {
+    font-size: 11px;
+    fill: var(--secondary-text-color, #888);
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    pointer-events: none;
+  }
+
+  /* ── Drag handle ───────────────────────────────────────────────────────── */
+
+  .timer-handle {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .timer-handle.dragging {
+    cursor: grabbing;
+  }
+
+  /* ── Power button ──────────────────────────────────────────────────────── */
+
   .bottom-controls {
     display: flex;
-    padding: 2px 10px 10px 10px;
+    padding: 0 8px 8px 8px;
     flex-shrink: 0;
   }
 
   .btn {
-    height: 40px;
+    height: 36px;
     border: none;
     border-radius: var(--control-button-border-radius, 10px);
     cursor: pointer;
@@ -156,7 +114,7 @@ export default css`
   }
 
   .btn-icon {
-    --mdc-icon-size: 20px;
+    --mdc-icon-size: 18px;
     line-height: 0;
   }
 
@@ -169,24 +127,16 @@ export default css`
     color: #ffffff;
   }
 
-  .power-btn.on .btn-icon {
-    color: #ffffff;
-  }
+  .power-btn.on .btn-icon { color: #ffffff; }
 
-  .power-btn.on:hover {
-    background-color: #d43020;
-  }
+  .power-btn.on:hover  { background-color: #d43020; }
 
   .power-btn.off {
     background-color: rgba(158, 158, 158, 0.2);
     color: var(--primary-text-color);
   }
 
-  .power-btn.off .btn-icon {
-    color: var(--primary-text-color);
-  }
+  .power-btn.off .btn-icon { color: var(--primary-text-color); }
 
-  .power-btn.off:hover {
-    background-color: rgba(158, 158, 158, 0.3);
-  }
+  .power-btn.off:hover { background-color: rgba(158, 158, 158, 0.3); }
 `;

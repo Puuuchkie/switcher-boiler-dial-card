@@ -6,33 +6,60 @@ import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
 // ── SVG geometry ─────────────────────────────────────────────────────────────
 const CX = 120;
 const CY = 120;
-const R = 85;
-const CIRCUMFERENCE = 2 * Math.PI * R; // ≈ 534.07
-const MIN_PER_ROTATION = 60;   // 1 full rotation = 60 min → top→bottom = 30 min
-const DEFAULT_LIMIT_MIN = 150; // default max when timer_limit not set
+const R = 90;
 
-// Raw "clock" angle (0° = top, clockwise), in degrees 0–360
-function rawAngle(x: number, y: number): number {
+// 270° arc: starts at bottom-left (225°), ends at bottom-right (315°),
+// going clockwise through the top.  Gap (90°) is at the bottom.
+const ARC_START_DEG = 225;   // clock angle where 0 min sits
+const ARC_SPAN_DEG  = 270;   // total arc degrees
+const ARC_ROTATE    = ARC_START_DEG - 90;  // SVG rotation offset = 135°
+
+const FULL_CIRC    = 2 * Math.PI * R;            // ≈ 565.49
+const TRACK_LEN    = FULL_CIRC * (ARC_SPAN_DEG / 360); // 270° portion ≈ 424.12
+const GAP_LEN      = FULL_CIRC - TRACK_LEN;            // 90° gap      ≈ 141.37
+
+const MIN_PER_ROTATION = 60;    // full arc = 60 min  →  top-to-bottom = 30 min
+const DEFAULT_LIMIT_MIN = 150;
+
+// Convert "minutes along the arc" to a clock angle (degrees)
+function minutesToClockAngle(minutes: number, maxMin: number): number {
+  return ARC_START_DEG + (minutes / maxMin) * ARC_SPAN_DEG;
+}
+
+// SVG x,y for the handle at a given clock angle
+function clockAngleToXY(clockDeg: number): { x: number; y: number } {
+  const rad = (clockDeg - 90) * (Math.PI / 180);
+  return { x: CX + R * Math.cos(rad), y: CY + R * Math.sin(rad) };
+}
+
+// Raw "clock" angle of a pointer event (0° = top, clockwise), 0–360
+function rawClockAngle(x: number, y: number): number {
   let a = (Math.atan2(y, x) * 180) / Math.PI + 90;
   if (a < 0) a += 360;
   if (a >= 360) a -= 360;
   return a;
 }
 
-// SVG coordinates of the knob for a given cumulative angle
-function knobPos(totalAngle: number): { x: number; y: number } {
-  const a = (totalAngle % 360 - 90) * (Math.PI / 180);
-  return { x: CX + R * Math.cos(a), y: CY + R * Math.sin(a) };
+// Map a raw clock angle to 0–ARC_SPAN_DEG (degrees along the arc from its start)
+// Returns null when the pointer is clearly in the dead-zone gap
+function clockAngleToArcDeg(clockDeg: number): number | null {
+  let rel = clockDeg - ARC_START_DEG;
+  if (rel < 0) rel += 360;
+  // rel is now 0–360 where 0 = arc start (225°), going clockwise
+  if (rel <= ARC_SPAN_DEG) return rel;          // on the arc
+  // In the gap — snap toward nearest end
+  const distToEnd   = rel - ARC_SPAN_DEG;       // distance past the end
+  const distToStart = 360 - rel;                 // distance before the start
+  return distToEnd <= distToStart ? ARC_SPAN_DEG : 0;
 }
 
 export class SwitcherBoilerCardCircular extends LitElement {
-  // Only state that drives re-renders
-  @state() private _totalAngle = 0;  // cumulative degrees; 360° = 60 min
-  @state() private _dragging = false;
+  @state() private _arcDeg    = 0;     // degrees along the 270° arc (0–max)
+  @state() private _dragging  = false;
 
-  // Drag bookkeeping — no re-render needed
-  private _lastRawAngle = 0;
-  private _dragStarted = false;
+  private _lastArcDeg    = 0;   // previous arc position for multi-lap delta
+  private _lastRawAngle  = 0;   // previous raw clock angle for delta calc
+  private _dragStarted   = false;
   private _prevEntityState = "";
 
   @property({ attribute: false }) hass!: HomeAssistant;
@@ -59,44 +86,32 @@ export class SwitcherBoilerCardCircular extends LitElement {
   setConfig(config: LovelaceCardConfig) {
     if (!config.entity) throw new Error("You need to define an entity");
     this.config = config;
-    this._totalAngle = 0;
+    this._arcDeg = 0;
   }
 
-  // Reset dial when the device turns off (manual or auto)
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
     if (!changedProperties.has("hass") || !this.config?.entity) return;
-
-    const entityState = this.hass?.states?.[this.config.entity];
-    const currentState = entityState?.state ?? "";
-
+    const currentState = this.hass?.states?.[this.config.entity]?.state ?? "";
     if (this._prevEntityState === "on" && currentState !== "on") {
-      this._totalAngle = 0;
+      this._arcDeg = 0;
     }
     this._prevEntityState = currentState;
   }
 
   // ── Derived values ────────────────────────────────────────────────────────
 
-  private get _timerMinutes(): number {
-    return Math.round((this._totalAngle / 360) * MIN_PER_ROTATION);
-  }
-
-  private get _partialAngle(): number {
-    return this._totalAngle % 360;
-  }
-
-  private get _fullRotations(): number {
-    return Math.floor(this._totalAngle / 360);
-  }
-
-  private get _maxAngle(): number {
+  private get _maxArcDeg(): number {
     const limit = this.config?.timer_limit;
     const limitMin = limit != null && limit !== "" ? Number(limit) : DEFAULT_LIMIT_MIN;
-    return (limitMin / MIN_PER_ROTATION) * 360;
+    // Each full 270° arc = MIN_PER_ROTATION minutes; allow multiple laps
+    return (limitMin / MIN_PER_ROTATION) * ARC_SPAN_DEG;
   }
 
-  // "30" when < 60 min, "1:30" when >= 60 min
+  private get _timerMinutes(): number {
+    return Math.round((this._arcDeg / ARC_SPAN_DEG) * MIN_PER_ROTATION);
+  }
+
   private get _timerDisplay(): string {
     const m = this._timerMinutes;
     if (m < 60) return String(m);
@@ -115,19 +130,20 @@ export class SwitcherBoilerCardCircular extends LitElement {
     const svgEl = this.shadowRoot?.querySelector(".timer-svg") as SVGSVGElement | null;
     if (!svgEl) return 0;
     const rect = svgEl.getBoundingClientRect();
-    const scale = 240 / rect.width; // viewBox is 240×240
-    return rawAngle(
+    const scale = 240 / rect.width;
+    return rawClockAngle(
       (e.clientX - rect.left) * scale - CX,
-      (e.clientY - rect.top) * scale - CY,
+      (e.clientY - rect.top)  * scale - CY,
     );
   }
 
   private _onPointerDown(e: PointerEvent): void {
     e.preventDefault();
     e.stopPropagation();
-    this._dragging = true;
+    this._dragging   = true;
     this._dragStarted = false;
     this._lastRawAngle = this._rawAngleFromPointer(e);
+    this._lastArcDeg  = this._arcDeg;
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
   }
 
@@ -137,20 +153,19 @@ export class SwitcherBoilerCardCircular extends LitElement {
 
     const cur = this._rawAngleFromPointer(e);
 
-    // Short-circuit delta to handle the 0°/360° wraparound correctly
+    // Delta in raw clock-angle space handles the 0°/360° wrap correctly
     let delta = cur - this._lastRawAngle;
-    if (delta > 180) delta -= 360;   // wrapped past 0° going counter-clockwise
-    if (delta < -180) delta += 360;  // wrapped past 0° going clockwise
+    if (delta >  180) delta -= 360;
+    if (delta < -180) delta += 360;
 
-    let newTotal = this._totalAngle + delta;
-    newTotal = Math.max(0, Math.min(this._maxAngle, newTotal));
+    let newArc = this._arcDeg + delta;
+    newArc = Math.max(0, Math.min(this._maxArcDeg, newArc));
 
-    this._totalAngle = newTotal;
+    this._arcDeg       = newArc;
     this._lastRawAngle = cur;
-    this._dragStarted = true;
+    this._dragStarted  = true;
   }
 
-  // Auto-start the boiler when the user releases the knob (if time > 0)
   private _onPointerUp(_e: PointerEvent): void {
     if (this._dragging && this._dragStarted && this._timerMinutes > 0) {
       this.hass.callService("switcher_kis", "turn_on_with_timer", {
@@ -158,7 +173,7 @@ export class SwitcherBoilerCardCircular extends LitElement {
         timer_minutes: String(this._timerMinutes),
       });
     }
-    this._dragging = false;
+    this._dragging    = false;
     this._dragStarted = false;
   }
 
@@ -169,14 +184,13 @@ export class SwitcherBoilerCardCircular extends LitElement {
     this.hass.callService("homeassistant", "toggle", { entity_id: this.config.entity });
   }
 
-  private _showMoreInfo(e: Event, entityId: string): void {
+  private _showMoreInfo(e: Event): void {
     e.stopPropagation();
+    const entityId = this.config.entity;
     if (!entityId) return;
     this.dispatchEvent(
       new CustomEvent("hass-more-info", {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
+        bubbles: true, cancelable: true, composed: true,
         detail: { entityId },
       }),
     );
@@ -189,156 +203,153 @@ export class SwitcherBoilerCardCircular extends LitElement {
     if (!entityState) return;
 
     const friendlyName = entityState.attributes?.friendly_name || "Boiler";
-    const displayName = this.config.name || friendlyName;
-    const isOn = entityState.state === "on";
-    const displayIcon = this.config.icon || entityState.attributes?.icon || "mdi:waves";
+    const displayName  = this.config.name || friendlyName;
+    const isOn         = entityState.state === "on";
 
-    // Secondary status line
-    let displayState = isOn
-      ? (this.hass.localize("component.switch.entity_component._.state.on") || "on")
+    // Compact single-line state (shown inside the dial)
+    let stateText = isOn
+      ? (this.hass.localize("component.switch.entity_component._.state.on")  || "on")
       : (this.hass.localize("component.switch.entity_component._.state.off") || "off");
 
     if (isOn && this.config.time_left && this.hass.states[this.config.time_left]) {
-      displayState = this.hass.states[this.config.time_left].state;
+      stateText = this.hass.states[this.config.time_left].state;
     }
 
+    let powerText = "";
     if (this.config.power_sensor && this.hass.states[this.config.power_sensor]) {
-      const ps = this.hass.states[this.config.power_sensor];
+      const ps   = this.hass.states[this.config.power_sensor];
       const unit = ps.attributes?.unit_of_measurement || "";
-      displayState += ` • ${ps.state}${unit}`;
+      powerText  = `${ps.state}${unit}`;
     }
 
-    // ── Arc geometry ────────────────────────────────────────────────────────
-    const partialAngle = this._partialAngle;
-    const fullRotations = this._fullRotations;
+    // ── Arc / handle geometry ────────────────────────────────────────────────
+    // Current position within one arc lap (0–270°)
+    const lapDeg     = this._arcDeg % ARC_SPAN_DEG;
+    const fullLaps   = Math.floor(this._arcDeg / ARC_SPAN_DEG);
 
-    // When totalAngle is exactly a multiple of 360°, show a full circle (not invisible)
-    const effectiveAngle = partialAngle === 0 && fullRotations > 0 ? 360 : partialAngle;
-    const dashOffset = CIRCUMFERENCE * (1 - effectiveAngle / 360);
-    const showArc = this._totalAngle > 0;
+    // Active arc: how much of the 270° track to fill
+    const activeFraction = lapDeg / ARC_SPAN_DEG;
+    const activeDash     = lapDeg === 0 && fullLaps > 0
+      ? TRACK_LEN                          // full arc when exactly on a lap boundary
+      : TRACK_LEN * activeFraction;
+    const showArc = this._arcDeg > 0;
 
-    const knob = knobPos(this._totalAngle);
-    const knobR = this._dragging ? 16 : 13;
+    // Handle position: map current arc-degrees back to a clock angle
+    const handleClockAngle = minutesToClockAngle(
+      this._timerMinutes % MIN_PER_ROTATION,
+      MIN_PER_ROTATION,
+    );
+    const knob      = clockAngleToXY(handleClockAngle);
+    const knobR     = this._dragging ? 13 : 11;
 
-    // Tick mark positions (0, 15, 30, 45 min)
-    const TICKS = [0, 15, 30, 45];
-    const LABELS = [
-      { min: 15, text: "15" },
-      { min: 30, text: "30" },
-      { min: 45, text: "45" },
-    ];
-    const LABEL_R = R + 22;
+    // Tick marks at 0, 15, 30, 45 min (first-lap arc positions only)
+    const TICK_MIN = [0, 15, 30, 45];
 
     return html`
       <ha-card class="card">
-        <!-- ── Header ─────────────────────────────────────────────────── -->
-        <div
-          class="card-header"
-          @click="${(e: MouseEvent) => this._showMoreInfo(e, this.config.entity)}"
-        >
-          <div class="icon-container ${isOn ? "on" : "off"}">
-            <ha-icon icon="${displayIcon}" class="icon ${isOn ? "on" : "off"}"></ha-icon>
-          </div>
-          <div class="header-label">
-            <span class="primary">${displayName}</span>
-            <span class="secondary">${displayState}</span>
-          </div>
-        </div>
 
-        <!-- ── Circular timer dial ────────────────────────────────────── -->
+        <!-- ── Circular dial ────────────────────────────────────────────── -->
         <div class="timer-wrapper">
-          <svg
-            class="timer-svg"
-            viewBox="0 0 240 240"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg class="timer-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <filter id="knob-shadow" x="-60%" y="-60%" width="220%" height="220%">
-                <feDropShadow dx="0" dy="1" stdDeviation="3"
+              <filter id="ks" x="-80%" y="-80%" width="260%" height="260%">
+                <feDropShadow dx="0" dy="1" stdDeviation="2.5"
                   flood-color="#000" flood-opacity="0.2" />
               </filter>
+              <!-- Clip inner text to the circle interior -->
+              <clipPath id="inner-clip">
+                <circle cx="${CX}" cy="${CY}" r="${R - 14}" />
+              </clipPath>
             </defs>
 
-            <!-- Tick marks at 0 / 15 / 30 / 45 min -->
-            ${TICKS.map((min) => {
-              const a = ((min / MIN_PER_ROTATION) * 360 - 90) * (Math.PI / 180);
-              return svg`
-                <line
-                  x1="${CX + (R - 8) * Math.cos(a)}"
-                  y1="${CY + (R - 8) * Math.sin(a)}"
-                  x2="${CX + (R + 8) * Math.cos(a)}"
-                  y2="${CY + (R + 8) * Math.sin(a)}"
-                  stroke="rgba(128,128,128,0.35)"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                />`;
-            })}
-
-            <!-- Background track -->
-            <circle
-              cx="${CX}" cy="${CY}" r="${R}"
+            <!-- ── Track (270° gray arc) ─────────────────────────────── -->
+            <circle cx="${CX}" cy="${CY}" r="${R}"
               fill="none"
-              stroke="rgba(128,128,128,0.15)"
-              stroke-width="12"
+              stroke="rgba(128,128,128,0.18)"
+              stroke-width="13"
               stroke-linecap="round"
+              stroke-dasharray="${TRACK_LEN} ${GAP_LEN}"
+              transform="rotate(${ARC_ROTATE}, ${CX}, ${CY})"
             />
 
-            <!-- Completed-rotation ring: muted full circle when ≥1 full lap -->
-            ${fullRotations > 0 ? svg`
-              <circle
-                cx="${CX}" cy="${CY}" r="${R}"
+            <!-- Completed-lap ring (muted full track) -->
+            ${fullLaps > 0 ? svg`
+              <circle cx="${CX}" cy="${CY}" r="${R}"
                 fill="none"
-                stroke="rgba(245,68,54,0.22)"
-                stroke-width="12"
+                stroke="rgba(245,68,54,0.2)"
+                stroke-width="13"
+                stroke-linecap="round"
+                stroke-dasharray="${TRACK_LEN} ${GAP_LEN}"
+                transform="rotate(${ARC_ROTATE}, ${CX}, ${CY})"
               />` : ""}
 
-            <!-- Active arc (from top, clockwise to current position) -->
+            <!-- Active arc (red fill of the track) -->
             ${showArc ? svg`
-              <circle
-                cx="${CX}" cy="${CY}" r="${R}"
+              <circle cx="${CX}" cy="${CY}" r="${R}"
                 fill="none"
                 stroke="#F54436"
-                stroke-width="12"
+                stroke-width="13"
                 stroke-linecap="round"
-                stroke-dasharray="${CIRCUMFERENCE}"
-                stroke-dashoffset="${dashOffset}"
-                transform="rotate(-90, ${CX}, ${CY})"
+                stroke-dasharray="${activeDash} ${FULL_CIRC - activeDash}"
+                transform="rotate(${ARC_ROTATE}, ${CX}, ${CY})"
               />` : ""}
 
-            <!-- Minute labels at 15 / 30 / 45 -->
-            ${LABELS.map(({ min, text }) => {
-              const a = ((min / MIN_PER_ROTATION) * 360 - 90) * (Math.PI / 180);
+            <!-- Tick dots at 0 / 15 / 30 / 45 min -->
+            ${TICK_MIN.map((min) => {
+              const ca = minutesToClockAngle(min, MIN_PER_ROTATION);
+              const p  = clockAngleToXY(ca);
               return svg`
-                <text
-                  x="${CX + LABEL_R * Math.cos(a)}"
-                  y="${CY + LABEL_R * Math.sin(a)}"
-                  text-anchor="middle"
-                  dominant-baseline="middle"
-                  class="tick-label"
-                >${text}</text>`;
+                <circle cx="${p.x}" cy="${p.y}" r="2.5"
+                  fill="rgba(128,128,128,0.45)" />`;
             })}
 
-            <!-- Center: timer value -->
-            <text
-              x="${CX}" y="${CY - 10}"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              class="center-value"
-            >${this._timerDisplay}</text>
-            <text
-              x="${CX}" y="${CY + 20}"
-              text-anchor="middle"
-              dominant-baseline="middle"
-              class="center-unit"
-            >${this._timerUnit}</text>
+            <!-- ── Inner content (name · timer · state) ──────────────── -->
+            <g clip-path="url(#inner-clip)">
+              <!-- Name (tap for more-info) -->
+              <text x="${CX}" y="82"
+                text-anchor="middle" dominant-baseline="middle"
+                class="inner-name"
+                @click="${this._showMoreInfo}"
+              >${displayName}</text>
 
-            <!-- Draggable knob -->
-            <circle
-              cx="${knob.x}" cy="${knob.y}" r="${knobR}"
+              <!-- Timer value -->
+              <text x="${CX}" y="116"
+                text-anchor="middle" dominant-baseline="middle"
+                class="center-value"
+              >${this._timerDisplay}</text>
+
+              <!-- Unit -->
+              <text x="${CX}" y="140"
+                text-anchor="middle" dominant-baseline="middle"
+                class="center-unit"
+              >${this._timerUnit}</text>
+
+              <!-- State -->
+              <text x="${CX}" y="157"
+                text-anchor="middle" dominant-baseline="middle"
+                class="inner-state"
+              >${stateText}</text>
+
+              <!-- Power sensor (optional) -->
+              ${powerText ? svg`
+                <text x="${CX}" y="171"
+                  text-anchor="middle" dominant-baseline="middle"
+                  class="inner-power"
+                >${powerText}</text>` : ""}
+            </g>
+
+            <!-- ── Handle ─────────────────────────────────────────────── -->
+            <!-- Visual dot (no pointer events) -->
+            <circle cx="${knob.x}" cy="${knob.y}" r="${knobR}"
               fill="white"
               stroke="#F54436"
-              stroke-width="3"
-              filter="url(#knob-shadow)"
+              stroke-width="2.5"
+              filter="url(#ks)"
+              style="pointer-events:none"
+            />
+            <!-- Large transparent hit area (~44 px touch target) -->
+            <circle cx="${knob.x}" cy="${knob.y}" r="22"
+              fill="transparent"
               class="timer-handle ${this._dragging ? "dragging" : ""}"
               @pointerdown="${this._onPointerDown}"
               @pointermove="${this._onPointerMove}"
@@ -357,13 +368,12 @@ export class SwitcherBoilerCardCircular extends LitElement {
             <span>${isOn ? "Turn Off" : "Turn On"}</span>
           </button>
         </div>
+
       </ha-card>
     `;
   }
 
-  getCardSize() {
-    return 4;
-  }
+  getCardSize() { return 3; }
 
   getLayoutOptions() {
     return {
