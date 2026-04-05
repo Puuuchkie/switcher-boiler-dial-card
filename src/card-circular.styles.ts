@@ -7,6 +7,7 @@ export default css`
     height: 100%;
     user-select: none;
     -webkit-user-select: none;
+    overflow: hidden;
   }
 
   .card-header {
@@ -85,10 +86,14 @@ export default css`
   }
 
   .timer-svg {
+    /* Fill available height (wrapper is flex:1 min-height:0) AND width,
+       capped at 210×210. The square viewBox + preserveAspectRatio="xMidYMid meet"
+       scales the dial to fit whichever dimension is smaller — no overflow. */
     width: 100%;
+    height: 100%;
     max-width: 210px;
+    max-height: 210px;
     touch-action: none;
-    overflow: visible;
   }
 
   .timer-handle {
