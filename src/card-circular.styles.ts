@@ -78,21 +78,24 @@ export default css`
 
   .timer-wrapper {
     flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 14px;
-    min-height: 0;
+    padding: 4px;
+    /* Expose this element's content-box dimensions as cqw / cqh */
+    container-type: size;
   }
 
   .timer-svg {
-    /* Fill available height (wrapper is flex:1 min-height:0) AND width,
-       capped at 210×210. The square viewBox + preserveAspectRatio="xMidYMid meet"
-       scales the dial to fit whichever dimension is smaller — no overflow. */
-    width: 100%;
-    height: 100%;
-    max-width: 210px;
-    max-height: 210px;
+    /*
+     * Scale to the smaller of container width or height, capped at 210 px.
+     * Because the viewBox is square (240×240) this keeps the dial perfectly
+     * circular and contained at any card size — no overflow onto header/button.
+     */
+    width: min(100cqw, 100cqh, 210px);
+    height: min(100cqw, 100cqh, 210px);
+    display: block;
     touch-action: none;
   }
 
