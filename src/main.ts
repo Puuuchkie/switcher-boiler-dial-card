@@ -11,7 +11,7 @@ declare global {
 }
 
 console.groupCollapsed(`%c SWITCHER-BOILER-CARD %c v${version}`, "color: white; background: #F54436; font-weight: bold", "color: #F54436; font-weight: bold"),
-console.log("Readme:", "https://github.com/dmatik/switcher-boiler-card"),
+console.log("Readme:", "https://github.com/Puuuchkie/switcher-boiler-dial-card"),
 console.groupEnd();
 
 customElements.define("switcher-boiler-card", SwitcherBoilerCard);
@@ -22,17 +22,17 @@ customElements.define("switcher-boiler-card-circular-editor", SwitcherBoilerCard
 window.customCards = window.customCards || [];
 window.customCards.push({
     type: "switcher-boiler-card",
-    name: "Switcher Boiler Card",
+    name: "Switcher Boiler Dial Card",
     description: "Custom Switcher Boiler Switch card for Home Assistant",
     preview: true,
-    documentationURL: "https://github.com/dmatik/switcher-boiler-card",
+    documentationURL: "https://github.com/Puuuchkie/switcher-boiler-dial-card",
     configurable: true,
 });
 window.customCards.push({
     type: "switcher-boiler-card-circular",
-    name: "Switcher Boiler Card (Circular Timer)",
+    name: "Switcher Boiler Dial Card (Circular Timer)",
     description: "Switcher Boiler card with a draggable circular timer dial",
     preview: true,
-    documentationURL: "https://github.com/dmatik/switcher-boiler-card",
+    documentationURL: "https://github.com/Puuuchkie/switcher-boiler-dial-card",
     configurable: true,
 });
