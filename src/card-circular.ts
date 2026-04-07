@@ -92,11 +92,34 @@ export class SwitcherBoilerCardCircular extends LitElement {
   updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
     if (!changedProperties.has("hass") || !this.config?.entity) return;
+
     const currentState = this.hass?.states?.[this.config.entity]?.state ?? "";
+
+    // Reset dial when device turns off
     if (this._prevEntityState === "on" && currentState !== "on") {
       this._arcDeg = 0;
     }
+
+    // Keep dial in sync with live time_left sensor while device is on and not dragging
+    if (currentState === "on" && !this._dragging && this.config.time_left) {
+      const sensorState = this.hass.states[this.config.time_left]?.state;
+      if (sensorState && sensorState !== "unavailable" && sensorState !== "unknown" && sensorState !== "00:00:00") {
+        const minutes = this._hmsToMinutes(sensorState);
+        if (minutes > 0) {
+          this._arcDeg = Math.min((minutes / MIN_PER_ROTATION) * ARC_SPAN_DEG, this._maxArcDeg);
+        }
+      }
+    }
+
     this._prevEntityState = currentState;
+  }
+
+  // Parse H:MM:SS or HH:MM:SS to fractional minutes
+  private _hmsToMinutes(state: string): number {
+    const parts = state.split(":").map(Number);
+    if (parts.length !== 3) return 0;
+    const [h, m, s] = parts;
+    return h * 60 + m + s / 60;
   }
 
   // ── Derived values ────────────────────────────────────────────────────────
