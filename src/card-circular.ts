@@ -207,24 +207,30 @@ export class SwitcherBoilerCardCircular extends LitElement {
     const displayName  = this.config.name || friendlyName;
     const isOn         = entityState.state === "on";
 
-    // While dragging: show set minutes. Once released: show live HH:MM:SS countdown.
+    // While dragging: show set minutes. Once released: show live H:MM:SS countdown.
     const timeLeftSensorState = this.config.time_left
       ? (this.hass.states[this.config.time_left]?.state ?? null)
       : null;
-    // Show the raw countdown when device is on, not dragging, and sensor has a real value
     const showCountdown = isOn
       && !this._dragging
       && timeLeftSensorState !== null
       && timeLeftSensorState !== "unavailable"
       && timeLeftSensorState !== "unknown"
       && timeLeftSensorState !== "00:00:00";
-    const centerDisplay  = showCountdown ? timeLeftSensorState! : this._timerDisplay;
-    const centerUnit     = showCountdown ? "" : this._timerUnit;
 
-    // Sub-label: "off" only when idle at zero
-    const subLabel = !isOn && this._arcDeg === 0
-      ? (this.hass.localize("component.switch.entity_component._.state.off") || "off")
+    // Strip leading zero from HH:MM:SS → H:MM:SS
+    const countdownDisplay = timeLeftSensorState
+      ? timeLeftSensorState.replace(/^0(\d:)/, "$1")
       : "";
+
+    const centerDisplay = showCountdown ? countdownDisplay : this._timerDisplay;
+    // Unit row: "hr" when >60 min set, "min" otherwise; hidden during countdown
+    const centerUnit = this._timerMinutes >= 60 ? "hr" : "min";
+
+    // State row: always "on" or "off" — never disappears
+    const stateLabel = isOn
+      ? (this.hass.localize("component.switch.entity_component._.state.on")  || "on")
+      : (this.hass.localize("component.switch.entity_component._.state.off") || "off");
 
     let powerText = "";
     if (this.config.power_sensor && this.hass.states[this.config.power_sensor]) {
@@ -304,38 +310,37 @@ export class SwitcherBoilerCardCircular extends LitElement {
                   fill="rgba(128,128,128,0.45)" />`;
             })}
 
-            <!-- ── Inner content (name · timer · state) ──────────────── -->
-            <!-- Name (tap for more-info) -->
+            <!-- ── Inner content: fixed rows, nothing ever disappears ─── -->
+            <!-- Row 1: name -->
             <text x="${CX}" y="82"
               text-anchor="middle" dominant-baseline="middle"
               class="inner-name"
               @click="${this._showMoreInfo}"
             >${displayName}</text>
 
-            <!-- Center: HH:MM:SS countdown when running, set minutes when idle/dragging -->
-            <text x="${CX}" y="${showCountdown ? 122 : 118}"
+            <!-- Row 2: big number — countdown or set minutes -->
+            <text x="${CX}" y="120"
               text-anchor="middle" dominant-baseline="middle"
               class="center-value"
               style="${showCountdown ? "font-size:26px" : ""}"
             >${centerDisplay}</text>
 
-            <!-- Unit (hidden during countdown) -->
-            ${!showCountdown ? svg`
-              <text x="${CX}" y="144"
-                text-anchor="middle" dominant-baseline="middle"
-                class="center-unit"
-              >${centerUnit}</text>` : ""}
+            <!-- Row 3: unit — "min" / "hr" (hidden during countdown) -->
+            <text x="${CX}" y="144"
+              text-anchor="middle" dominant-baseline="middle"
+              class="center-unit"
+              style="${showCountdown ? "opacity:0" : ""}"
+            >${centerUnit}</text>
 
-            <!-- Sub-label: "off" only when idle at 0 -->
-            ${subLabel ? svg`
-              <text x="${CX}" y="161"
-                text-anchor="middle" dominant-baseline="middle"
-                class="inner-state"
-              >${subLabel}</text>` : ""}
+            <!-- Row 4: on / off state — always visible -->
+            <text x="${CX}" y="161"
+              text-anchor="middle" dominant-baseline="middle"
+              class="inner-state"
+            >${stateLabel}</text>
 
-            <!-- Power sensor (optional) -->
+            <!-- Row 5: power sensor — always at same position -->
             ${powerText ? svg`
-              <text x="${CX}" y="${subLabel ? 177 : 161}"
+              <text x="${CX}" y="177"
                 text-anchor="middle" dominant-baseline="middle"
                 class="inner-power"
               >${powerText}</text>` : ""}
