@@ -503,7 +503,7 @@ const ct={attribute:!0,type:String,converter:v,reflect:!1,hasChanged:$},ht=(t=ct
   .power-btn.off .btn-icon { color: var(--primary-text-color); }
 
   .power-btn.off:hover { background-color: rgba(158, 158, 158, 0.3); }
-`;const mt=120,_t=120,bt=95,vt=360,$t=2*Math.PI*bt,yt=$t;function wt(t,e){return 0+t/e*vt}function xt(t){const e=(t-90)*(Math.PI/180);return{x:mt+bt*Math.cos(e),y:_t+bt*Math.sin(e)}}class At extends at{constructor(){super(...arguments),this._arcDeg=0,this._dragging=!1,this._lastArcDeg=0,this._lastRawAngle=0,this._dragStarted=!1,this._prevEntityState=""}static getConfigElement(){return document.createElement("switcher-boiler-dial-card-editor")}static getStubConfig(){return{type:"custom:switcher-boiler-dial-card",name:"Boiler",entity:"",icon:"",time_left:"",power_sensor:"",timer_limit:90}}setConfig(t){if(!t.entity)throw new Error("You need to define an entity");this.config=t,this._arcDeg=0}updated(t){var e,i,s,o,n;if(super.updated(t),!t.has("hass")||!(null===(e=this.config)||void 0===e?void 0:e.entity))return;const r=null!==(n=null===(o=null===(s=null===(i=this.hass)||void 0===i?void 0:i.states)||void 0===s?void 0:s[this.config.entity])||void 0===o?void 0:o.state)&&void 0!==n?n:"";"on"===this._prevEntityState&&"on"!==r&&(this._arcDeg=0),this._prevEntityState=r}get _maxArcDeg(){var t;const e=null===(t=this.config)||void 0===t?void 0:t.timer_limit;return(null!=e&&""!==e?Number(e):150)/60*vt}get _timerMinutes(){return Math.round(this._arcDeg/vt*60)}get _timerDisplay(){const t=this._timerMinutes;if(t<60)return String(t);return`${Math.floor(t/60)}:${(t%60).toString().padStart(2,"0")}`}get _timerUnit(){return this._timerMinutes>=60?"hr":"min"}_rawAngleFromPointer(t){var e;const i=null===(e=this.shadowRoot)||void 0===e?void 0:e.querySelector(".timer-svg");if(!i)return 0;const s=i.getBoundingClientRect(),o=240/s.width;return function(t,e){let i=180*Math.atan2(e,t)/Math.PI+90;return i<0&&(i+=360),i>=360&&(i-=360),i}((t.clientX-s.left)*o-mt,(t.clientY-s.top)*o-_t)}_onPointerDown(t){t.preventDefault(),t.stopPropagation(),this._dragging=!0,this._dragStarted=!1,this._lastRawAngle=this._rawAngleFromPointer(t),this._lastArcDeg=this._arcDeg,t.currentTarget.setPointerCapture(t.pointerId)}_onPointerMove(t){if(!this._dragging)return;t.preventDefault();const e=this._rawAngleFromPointer(t);let i=e-this._lastRawAngle;i>180&&(i-=360),i<-180&&(i+=360);let s=this._arcDeg+i;s=Math.max(0,Math.min(this._maxArcDeg,s)),this._arcDeg=s,this._lastRawAngle=e,this._dragStarted=!0}_onPointerUp(t){this._dragging&&this._dragStarted&&this._timerMinutes>0&&this.hass.callService("switcher_kis","turn_on_with_timer",{entity_id:this.config.entity,timer_minutes:String(this._timerMinutes)}),this._dragging=!1,this._dragStarted=!1}_toggleBoiler(t){t.stopPropagation(),this.hass.callService("homeassistant","toggle",{entity_id:this.config.entity})}_showMoreInfo(t){t.stopPropagation();const e=this.config.entity;e&&this.dispatchEvent(new CustomEvent("hass-more-info",{bubbles:!0,cancelable:!0,composed:!0,detail:{entityId:e}}))}render(){var t,e,i,s,o;const n=null===(e=null===(t=this.hass)||void 0===t?void 0:t.states)||void 0===e?void 0:e[this.config.entity];if(!n)return;const r=(null===(i=n.attributes)||void 0===i?void 0:i.friendly_name)||"Boiler",a=this.config.name||r,l="on"===n.state,c=l&&!this._dragging&&this.config.time_left?null===(s=this.hass.states[this.config.time_left])||void 0===s?void 0:s.state:null,h=!!c,d=h?c:this._timerDisplay,u=h?"":this._timerUnit,p=l||0!==this._arcDeg?"":this.hass.localize("component.switch.entity_component._.state.off")||"off";let f="";if(this.config.power_sensor&&this.hass.states[this.config.power_sensor]){const t=this.hass.states[this.config.power_sensor],e=(null===(o=t.attributes)||void 0===o?void 0:o.unit_of_measurement)||"";f=`${t.state}${e}`}const g=this._arcDeg%vt,m=Math.floor(this._arcDeg/vt),_=0===g&&m>0?yt:yt*(g/vt),b=this._arcDeg>0,v=xt(wt(this._timerMinutes%60,60)),$=this._dragging?13:11;return V`
+`;const mt=120,_t=120,bt=95,vt=360,$t=2*Math.PI*bt,yt=$t;function wt(t,e){return 0+t/e*vt}function xt(t){const e=(t-90)*(Math.PI/180);return{x:mt+bt*Math.cos(e),y:_t+bt*Math.sin(e)}}class At extends at{constructor(){super(...arguments),this._arcDeg=0,this._dragging=!1,this._lastArcDeg=0,this._lastRawAngle=0,this._dragStarted=!1,this._prevEntityState=""}static getConfigElement(){return document.createElement("switcher-boiler-dial-card-editor")}static getStubConfig(){return{type:"custom:switcher-boiler-dial-card",name:"Boiler",entity:"",icon:"",time_left:"",power_sensor:"",timer_limit:90}}setConfig(t){if(!t.entity)throw new Error("You need to define an entity");this.config=t,this._arcDeg=0}updated(t){var e,i,s,o,n;if(super.updated(t),!t.has("hass")||!(null===(e=this.config)||void 0===e?void 0:e.entity))return;const r=null!==(n=null===(o=null===(s=null===(i=this.hass)||void 0===i?void 0:i.states)||void 0===s?void 0:s[this.config.entity])||void 0===o?void 0:o.state)&&void 0!==n?n:"";"on"===this._prevEntityState&&"on"!==r&&(this._arcDeg=0),this._prevEntityState=r}get _maxArcDeg(){var t;const e=null===(t=this.config)||void 0===t?void 0:t.timer_limit;return(null!=e&&""!==e?Number(e):150)/60*vt}get _timerMinutes(){return Math.round(this._arcDeg/vt*60)}get _timerDisplay(){const t=this._timerMinutes;if(t<60)return String(t);return`${Math.floor(t/60)}:${(t%60).toString().padStart(2,"0")}`}get _timerUnit(){return this._timerMinutes>=60?"hr":"min"}_rawAngleFromPointer(t){var e;const i=null===(e=this.shadowRoot)||void 0===e?void 0:e.querySelector(".timer-svg");if(!i)return 0;const s=i.getBoundingClientRect(),o=240/s.width;return function(t,e){let i=180*Math.atan2(e,t)/Math.PI+90;return i<0&&(i+=360),i>=360&&(i-=360),i}((t.clientX-s.left)*o-mt,(t.clientY-s.top)*o-_t)}_onPointerDown(t){t.preventDefault(),t.stopPropagation(),this._dragging=!0,this._dragStarted=!1,this._lastRawAngle=this._rawAngleFromPointer(t),this._lastArcDeg=this._arcDeg,t.currentTarget.setPointerCapture(t.pointerId)}_onPointerMove(t){if(!this._dragging)return;t.preventDefault();const e=this._rawAngleFromPointer(t);let i=e-this._lastRawAngle;i>180&&(i-=360),i<-180&&(i+=360);let s=this._arcDeg+i;s=Math.max(0,Math.min(this._maxArcDeg,s)),this._arcDeg=s,this._lastRawAngle=e,this._dragStarted=!0}_onPointerUp(t){this._dragging&&this._dragStarted&&this._timerMinutes>0&&this.hass.callService("switcher_kis","turn_on_with_timer",{entity_id:this.config.entity,timer_minutes:String(this._timerMinutes)}),this._dragging=!1,this._dragStarted=!1}_toggleBoiler(t){t.stopPropagation(),this.hass.callService("homeassistant","toggle",{entity_id:this.config.entity})}_showMoreInfo(t){t.stopPropagation();const e=this.config.entity;e&&this.dispatchEvent(new CustomEvent("hass-more-info",{bubbles:!0,cancelable:!0,composed:!0,detail:{entityId:e}}))}render(){var t,e,i,s,o,n;const r=null===(e=null===(t=this.hass)||void 0===t?void 0:t.states)||void 0===e?void 0:e[this.config.entity];if(!r)return;const a=(null===(i=r.attributes)||void 0===i?void 0:i.friendly_name)||"Boiler",l=this.config.name||a,c="on"===r.state,h=this.config.time_left&&null!==(o=null===(s=this.hass.states[this.config.time_left])||void 0===s?void 0:s.state)&&void 0!==o?o:null,d=c&&!this._dragging&&null!==h&&"unavailable"!==h&&"unknown"!==h&&"00:00:00"!==h,u=d?h:this._timerDisplay,p=d?"":this._timerUnit,f=c||0!==this._arcDeg?"":this.hass.localize("component.switch.entity_component._.state.off")||"off";let g="";if(this.config.power_sensor&&this.hass.states[this.config.power_sensor]){const t=this.hass.states[this.config.power_sensor],e=(null===(n=t.attributes)||void 0===n?void 0:n.unit_of_measurement)||"";g=`${t.state}${e}`}const m=this._arcDeg%vt,_=Math.floor(this._arcDeg/vt),b=0===m&&_>0?yt:yt*(m/vt),v=this._arcDeg>0,$=xt(wt(this._timerMinutes%60,60)),y=this._dragging?13:11;return V`
       <ha-card class="card">
 
         <!-- ── Circular dial ────────────────────────────────────────────── -->
@@ -524,7 +524,7 @@ const ct={attribute:!0,type:String,converter:v,reflect:!1,hasChanged:$},ht=(t=ct
             />
 
             <!-- Completed-lap ring (muted full circle) -->
-            ${m>0?F`
+            ${_>0?F`
               <circle cx="${mt}" cy="${_t}" r="${bt}"
                 fill="none"
                 stroke="rgba(245,68,54,0.2)"
@@ -532,13 +532,13 @@ const ct={attribute:!0,type:String,converter:v,reflect:!1,hasChanged:$},ht=(t=ct
               />`:""}
 
             <!-- Active arc (red, starts at 12 o'clock, goes clockwise) -->
-            ${b?F`
+            ${v?F`
               <circle cx="${mt}" cy="${_t}" r="${bt}"
                 fill="none"
                 stroke="#F54436"
                 stroke-width="13"
                 stroke-linecap="round"
-                stroke-dasharray="${_} ${$t-_}"
+                stroke-dasharray="${b} ${$t-b}"
                 transform="rotate(${-90}, ${mt}, ${_t})"
               />`:""}
 
@@ -553,38 +553,39 @@ const ct={attribute:!0,type:String,converter:v,reflect:!1,hasChanged:$},ht=(t=ct
               text-anchor="middle" dominant-baseline="middle"
               class="inner-name"
               @click="${this._showMoreInfo}"
-            >${a}</text>
+            >${l}</text>
 
             <!-- Center: HH:MM:SS countdown when running, set minutes when idle/dragging -->
-            <text x="${mt}" y="${h?122:118}"
+            <text x="${mt}" y="${d?122:118}"
               text-anchor="middle" dominant-baseline="middle"
-              class="${h?"center-value center-value--sm":"center-value"}"
-            >${d}</text>
+              class="center-value"
+              style="${d?"font-size:26px":""}"
+            >${u}</text>
 
             <!-- Unit (hidden during countdown) -->
-            ${h?"":F`
+            ${d?"":F`
               <text x="${mt}" y="144"
                 text-anchor="middle" dominant-baseline="middle"
                 class="center-unit"
-              >${u}</text>`}
+              >${p}</text>`}
 
             <!-- Sub-label: "off" only when idle at 0 -->
-            ${p?F`
+            ${f?F`
               <text x="${mt}" y="161"
                 text-anchor="middle" dominant-baseline="middle"
                 class="inner-state"
-              >${p}</text>`:""}
+              >${f}</text>`:""}
 
             <!-- Power sensor (optional) -->
-            ${f?F`
-              <text x="${mt}" y="${p?177:161}"
+            ${g?F`
+              <text x="${mt}" y="${f?177:161}"
                 text-anchor="middle" dominant-baseline="middle"
                 class="inner-power"
-              >${f}</text>`:""}
+              >${g}</text>`:""}
 
             <!-- ── Handle ─────────────────────────────────────────────── -->
             <!-- Visual dot (no pointer events) -->
-            <circle cx="${v.x}" cy="${v.y}" r="${$}"
+            <circle cx="${$.x}" cy="${$.y}" r="${y}"
               fill="white"
               stroke="#F54436"
               stroke-width="2.5"
@@ -592,7 +593,7 @@ const ct={attribute:!0,type:String,converter:v,reflect:!1,hasChanged:$},ht=(t=ct
               style="pointer-events:none"
             />
             <!-- Large transparent hit area (~44 px touch target) -->
-            <circle cx="${v.x}" cy="${v.y}" r="22"
+            <circle cx="${$.x}" cy="${$.y}" r="22"
               fill="transparent"
               class="timer-handle ${this._dragging?"dragging":""}"
               @pointerdown="${this._onPointerDown}"
@@ -605,11 +606,11 @@ const ct={attribute:!0,type:String,converter:v,reflect:!1,hasChanged:$},ht=(t=ct
         <!-- ── Power button ──────────────────────────────────────────── -->
         <div class="bottom-controls">
           <button
-            class="btn power-btn ${l?"on":"off"}"
+            class="btn power-btn ${c?"on":"off"}"
             @click="${this._toggleBoiler}"
           >
             <ha-icon icon="mdi:power" class="btn-icon"></ha-icon>
-            <span>${l?"Turn Off":"Turn On"}</span>
+            <span>${c?"Turn Off":"Turn On"}</span>
           </button>
         </div>
 

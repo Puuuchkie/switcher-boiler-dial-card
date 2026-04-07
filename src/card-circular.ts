@@ -208,11 +208,17 @@ export class SwitcherBoilerCardCircular extends LitElement {
     const isOn         = entityState.state === "on";
 
     // While dragging: show set minutes. Once released: show live HH:MM:SS countdown.
-    const timeLeftState = isOn && !this._dragging && this.config.time_left
-      ? this.hass.states[this.config.time_left]?.state
+    const timeLeftSensorState = this.config.time_left
+      ? (this.hass.states[this.config.time_left]?.state ?? null)
       : null;
-    const showCountdown  = !!timeLeftState;
-    const centerDisplay  = showCountdown ? timeLeftState! : this._timerDisplay;
+    // Show the raw countdown when device is on, not dragging, and sensor has a real value
+    const showCountdown = isOn
+      && !this._dragging
+      && timeLeftSensorState !== null
+      && timeLeftSensorState !== "unavailable"
+      && timeLeftSensorState !== "unknown"
+      && timeLeftSensorState !== "00:00:00";
+    const centerDisplay  = showCountdown ? timeLeftSensorState! : this._timerDisplay;
     const centerUnit     = showCountdown ? "" : this._timerUnit;
 
     // Sub-label: "off" only when idle at zero
@@ -309,7 +315,8 @@ export class SwitcherBoilerCardCircular extends LitElement {
             <!-- Center: HH:MM:SS countdown when running, set minutes when idle/dragging -->
             <text x="${CX}" y="${showCountdown ? 122 : 118}"
               text-anchor="middle" dominant-baseline="middle"
-              class="${showCountdown ? "center-value center-value--sm" : "center-value"}"
+              class="center-value"
+              style="${showCountdown ? "font-size:26px" : ""}"
             >${centerDisplay}</text>
 
             <!-- Unit (hidden during countdown) -->
