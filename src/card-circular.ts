@@ -124,20 +124,6 @@ export class SwitcherBoilerCardCircular extends LitElement {
     return this._timerMinutes >= 60 ? "hr" : "min";
   }
 
-  // Parse a HH:MM:SS sensor state into a display value + unit matching the drag style
-  private _parseTimeLeft(state: string): { display: string; unit: string } {
-    const parts = state.split(":").map(Number);
-    if (parts.length === 3) {
-      const [h, m, s] = parts;
-      const totalMin = h * 60 + m + (s > 0 ? 1 : 0); // round up to next minute
-      if (totalMin <= 0) return { display: "0", unit: "min" };
-      if (totalMin < 60) return { display: String(totalMin), unit: "min" };
-      const dh = Math.floor(totalMin / 60);
-      const dm = totalMin % 60;
-      return { display: `${dh}:${dm.toString().padStart(2, "0")}`, unit: "hr" };
-    }
-    return { display: state, unit: "" };
-  }
 
   // ── Drag handlers ─────────────────────────────────────────────────────────
 
@@ -221,19 +207,15 @@ export class SwitcherBoilerCardCircular extends LitElement {
     const displayName  = this.config.name || friendlyName;
     const isOn         = entityState.state === "on";
 
-    // Center display: live countdown when running, drag value otherwise
-    let centerDisplay = this._timerDisplay;
-    let centerUnit    = this._timerUnit;
+    // While dragging: show set minutes. Once released: show live HH:MM:SS countdown.
     const timeLeftState = isOn && !this._dragging && this.config.time_left
       ? this.hass.states[this.config.time_left]?.state
       : null;
-    if (timeLeftState) {
-      const tl   = this._parseTimeLeft(timeLeftState);
-      centerDisplay = tl.display;
-      centerUnit    = tl.unit;
-    }
+    const showCountdown  = !!timeLeftState;
+    const centerDisplay  = showCountdown ? timeLeftState! : this._timerDisplay;
+    const centerUnit     = showCountdown ? "" : this._timerUnit;
 
-    // Sub-label: "off" when idle and no timer set, empty when running (center already shows time)
+    // Sub-label: "off" only when idle at zero
     const subLabel = !isOn && this._arcDeg === 0
       ? (this.hass.localize("component.switch.entity_component._.state.off") || "off")
       : "";
@@ -324,17 +306,18 @@ export class SwitcherBoilerCardCircular extends LitElement {
               @click="${this._showMoreInfo}"
             >${displayName}</text>
 
-            <!-- Center: live countdown when running, set minutes when idle/dragging -->
-            <text x="${CX}" y="118"
+            <!-- Center: HH:MM:SS countdown when running, set minutes when idle/dragging -->
+            <text x="${CX}" y="${showCountdown ? 122 : 118}"
               text-anchor="middle" dominant-baseline="middle"
-              class="center-value"
+              class="${showCountdown ? "center-value center-value--sm" : "center-value"}"
             >${centerDisplay}</text>
 
-            <!-- Unit -->
-            <text x="${CX}" y="144"
-              text-anchor="middle" dominant-baseline="middle"
-              class="center-unit"
-            >${centerUnit}</text>
+            <!-- Unit (hidden during countdown) -->
+            ${!showCountdown ? svg`
+              <text x="${CX}" y="144"
+                text-anchor="middle" dominant-baseline="middle"
+                class="center-unit"
+              >${centerUnit}</text>` : ""}
 
             <!-- Sub-label: "off" only when idle at 0 -->
             ${subLabel ? svg`

@@ -50,6 +50,10 @@ export default css`
     pointer-events: none;
   }
 
+  .center-value--sm {
+    font-size: 28px;
+  }
+
   .center-unit {
     font-size: 13px;
     fill: var(--secondary-text-color, #888);
