@@ -224,13 +224,6 @@ export class SwitcherBoilerCardCircular extends LitElement {
       : "";
 
     const centerDisplay = showCountdown ? countdownDisplay : this._timerDisplay;
-    // Unit row: "hr" when >60 min set, "min" otherwise; hidden during countdown
-    const centerUnit = this._timerMinutes >= 60 ? "hr" : "min";
-
-    // State row: always "on" or "off" — never disappears
-    const stateLabel = isOn
-      ? (this.hass.localize("component.switch.entity_component._.state.on")  || "on")
-      : (this.hass.localize("component.switch.entity_component._.state.off") || "off");
 
     let powerText = "";
     if (this.config.power_sensor && this.hass.states[this.config.power_sensor]) {
@@ -238,6 +231,12 @@ export class SwitcherBoilerCardCircular extends LitElement {
       const unit = ps.attributes?.unit_of_measurement || "";
       powerText  = `${ps.state}${unit}`;
     }
+
+    // Bottom row: "on · 2.4kW" / "off · 2.4kW" / "on" / "off"
+    const stateLabel = isOn
+      ? (this.hass.localize("component.switch.entity_component._.state.on")  || "on")
+      : (this.hass.localize("component.switch.entity_component._.state.off") || "off");
+    const bottomLabel = powerText ? `${stateLabel} · ${powerText}` : stateLabel;
 
     // ── Arc / handle geometry ────────────────────────────────────────────────
     // Current position within one arc lap (0–270°)
@@ -319,31 +318,17 @@ export class SwitcherBoilerCardCircular extends LitElement {
             >${displayName}</text>
 
             <!-- Row 2: big number — countdown or set minutes -->
-            <text x="${CX}" y="120"
+            <text x="${CX}" y="122"
               text-anchor="middle" dominant-baseline="middle"
               class="center-value"
               style="${showCountdown ? "font-size:26px" : ""}"
             >${centerDisplay}</text>
 
-            <!-- Row 3: unit — "min" / "hr" (hidden during countdown) -->
-            <text x="${CX}" y="144"
-              text-anchor="middle" dominant-baseline="middle"
-              class="center-unit"
-              style="${showCountdown ? "opacity:0" : ""}"
-            >${centerUnit}</text>
-
-            <!-- Row 4: on / off state — always visible -->
-            <text x="${CX}" y="161"
+            <!-- Row 3: state + power combined, e.g. "on · 2.4kW" -->
+            <text x="${CX}" y="158"
               text-anchor="middle" dominant-baseline="middle"
               class="inner-state"
-            >${stateLabel}</text>
-
-            <!-- Row 5: power sensor — always at same position -->
-            ${powerText ? svg`
-              <text x="${CX}" y="177"
-                text-anchor="middle" dominant-baseline="middle"
-                class="inner-power"
-              >${powerText}</text>` : ""}
+            >${bottomLabel}</text>
 
             <!-- ── Handle ─────────────────────────────────────────────── -->
             <!-- Visual dot (no pointer events) -->
