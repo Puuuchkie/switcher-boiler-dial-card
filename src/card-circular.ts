@@ -124,6 +124,21 @@ export class SwitcherBoilerCardCircular extends LitElement {
     return this._timerMinutes >= 60 ? "hr" : "min";
   }
 
+  // Parse a HH:MM:SS sensor state into a display value + unit matching the drag style
+  private _parseTimeLeft(state: string): { display: string; unit: string } {
+    const parts = state.split(":").map(Number);
+    if (parts.length === 3) {
+      const [h, m, s] = parts;
+      const totalMin = h * 60 + m + (s > 0 ? 1 : 0); // round up to next minute
+      if (totalMin <= 0) return { display: "0", unit: "min" };
+      if (totalMin < 60) return { display: String(totalMin), unit: "min" };
+      const dh = Math.floor(totalMin / 60);
+      const dm = totalMin % 60;
+      return { display: `${dh}:${dm.toString().padStart(2, "0")}`, unit: "hr" };
+    }
+    return { display: state, unit: "" };
+  }
+
   // ── Drag handlers ─────────────────────────────────────────────────────────
 
   private _rawAngleFromPointer(e: PointerEvent): number {
@@ -206,14 +221,22 @@ export class SwitcherBoilerCardCircular extends LitElement {
     const displayName  = this.config.name || friendlyName;
     const isOn         = entityState.state === "on";
 
-    // Compact single-line state (shown inside the dial)
-    let stateText = isOn
-      ? (this.hass.localize("component.switch.entity_component._.state.on")  || "on")
-      : (this.hass.localize("component.switch.entity_component._.state.off") || "off");
-
-    if (isOn && this.config.time_left && this.hass.states[this.config.time_left]) {
-      stateText = this.hass.states[this.config.time_left].state;
+    // Center display: live countdown when running, drag value otherwise
+    let centerDisplay = this._timerDisplay;
+    let centerUnit    = this._timerUnit;
+    const timeLeftState = isOn && !this._dragging && this.config.time_left
+      ? this.hass.states[this.config.time_left]?.state
+      : null;
+    if (timeLeftState) {
+      const tl   = this._parseTimeLeft(timeLeftState);
+      centerDisplay = tl.display;
+      centerUnit    = tl.unit;
     }
+
+    // Sub-label: "off" when idle and no timer set, empty when running (center already shows time)
+    const subLabel = !isOn && this._arcDeg === 0
+      ? (this.hass.localize("component.switch.entity_component._.state.off") || "off")
+      : "";
 
     let powerText = "";
     if (this.config.power_sensor && this.hass.states[this.config.power_sensor]) {
@@ -301,27 +324,28 @@ export class SwitcherBoilerCardCircular extends LitElement {
               @click="${this._showMoreInfo}"
             >${displayName}</text>
 
-            <!-- Timer value -->
+            <!-- Center: live countdown when running, set minutes when idle/dragging -->
             <text x="${CX}" y="118"
               text-anchor="middle" dominant-baseline="middle"
               class="center-value"
-            >${this._timerDisplay}</text>
+            >${centerDisplay}</text>
 
             <!-- Unit -->
             <text x="${CX}" y="144"
               text-anchor="middle" dominant-baseline="middle"
               class="center-unit"
-            >${this._timerUnit}</text>
+            >${centerUnit}</text>
 
-            <!-- State -->
-            <text x="${CX}" y="161"
-              text-anchor="middle" dominant-baseline="middle"
-              class="inner-state"
-            >${stateText}</text>
+            <!-- Sub-label: "off" only when idle at 0 -->
+            ${subLabel ? svg`
+              <text x="${CX}" y="161"
+                text-anchor="middle" dominant-baseline="middle"
+                class="inner-state"
+              >${subLabel}</text>` : ""}
 
             <!-- Power sensor (optional) -->
             ${powerText ? svg`
-              <text x="${CX}" y="177"
+              <text x="${CX}" y="${subLabel ? 177 : 161}"
                 text-anchor="middle" dominant-baseline="middle"
                 class="inner-power"
               >${powerText}</text>` : ""}
